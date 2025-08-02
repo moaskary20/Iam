@@ -99,8 +99,77 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_verified' => 'boolean',
+            'purchased_products' => 'array',
+            'unlocked_markets' => 'array',
         ];
+    }
+
+    /**
+     * Get the user's current market progress
+     */
+    public function getCurrentMarket()
+    {
+        return \App\Models\Market::find($this->current_market_id);
+    }
+
+    /**
+     * Check if user can access a market
+     */
+    public function canAccessMarket($marketId)
+    {
+        return in_array($marketId, $this->unlocked_markets ?? [1]);
+    }
+
+    /**
+     * Check if user has purchased a product
+     */
+    public function hasPurchased($productId)
+    {
+        return in_array($productId, $this->purchased_products ?? []);
+    }
+
+    /**
+     * Purchase a product and unlock next
+     */
+    public function purchaseProduct($productId)
+    {
+        $purchasedProducts = $this->purchased_products ?? [];
+        
+        if (!in_array($productId, $purchasedProducts)) {
+            $purchasedProducts[] = $productId;
+            $this->purchased_products = $purchasedProducts;
+            
+            // Get current market products
+            $currentMarket = $this->getCurrentMarket();
+            $marketProducts = $currentMarket->products()->orderBy('id')->get();
+            
+            // Check if all products in current market are purchased
+            $allPurchased = true;
+            foreach ($marketProducts as $product) {
+                if (!in_array($product->id, $purchasedProducts)) {
+                    $allPurchased = false;
+                    break;
+                }
+            }
+            
+            // If all products purchased, unlock next market
+            if ($allPurchased) {
+                $unlockedMarkets = $this->unlocked_markets ?? [1];
+                $nextMarketId = $this->current_market_id + 1;
+                
+                if ($nextMarketId <= 5 && !in_array($nextMarketId, $unlockedMarkets)) {
+                    $unlockedMarkets[] = $nextMarketId;
+                    $this->unlocked_markets = $unlockedMarkets;
+                    $this->current_market_id = $nextMarketId;
+                    $this->current_product_index = 0;
+                }
+            } else {
+                // Move to next product in current market
+                $this->current_product_index++;
+            }
+            
+            $this->save();
+        }
     }
 
     /**

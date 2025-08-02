@@ -5,6 +5,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MarketController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -29,8 +30,19 @@ Route::get('/wallet', function () {
     return view('wallet');
 })->middleware(['auth', 'verified'])->name('wallet');
 
+// Market Routes
+Route::get('/markets', [MarketController::class, 'index'])->name('markets.index');
+Route::get('/markets/{market}', [MarketController::class, 'show'])->name('markets.show');
+Route::get('/products/{product}', [MarketController::class, 'product'])->name('products.show');
+
+// Progressive Market Routes
+Route::get('/progressive-market', [App\Http\Controllers\ProgressiveMarketController::class, 'index'])->name('progressive.market');
+Route::get('/progressive-market/{market}', [App\Http\Controllers\ProgressiveMarketController::class, 'showMarket'])->name('progressive.market.show');
+Route::post('/progressive-market/purchase/{product}', [App\Http\Controllers\ProgressiveMarketController::class, 'purchaseProduct'])->name('progressive.purchase');
+
+// Keep the old market route for backward compatibility
 Route::get('/market', function () {
-    return view('market');
+    return redirect()->route('progressive.market');
 })->middleware(['auth', 'verified'])->name('market');
 
 
