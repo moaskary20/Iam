@@ -5,6 +5,7 @@ echo "🚀 بدء عملية رفع مشروع IAM على السيرفر..."
 # إعداد المتطلبات
 echo "📦 تثبيت المتطلبات..."
 composer install --no-dev --optimize-autoloader
+composer dump-autoload --optimize
 npm install
 npm run build
 

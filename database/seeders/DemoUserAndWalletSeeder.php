@@ -40,7 +40,6 @@ class DemoUserAndWalletSeeder extends Seeder
                     Wallet::create([
                         'user_id' => $user->id,
                         'balance' => $user->balance,
-                        'currency' => 'USD',
                     ]);
                 }
                 
@@ -54,7 +53,6 @@ class DemoUserAndWalletSeeder extends Seeder
                     Wallet::create([
                         'user_id' => $existingUser->id,
                         'balance' => $existingUser->balance ?? rand(100, 1000),
-                        'currency' => 'USD',
                     ]);
                     $this->command->info("تم إنشاء محفظة للمستخدم: {$email}");
                 }
