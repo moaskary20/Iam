@@ -835,7 +835,7 @@
             </div>
             <div class="user-info-card">
                 <div style="font-size:1rem;color:var(--primary-600);font-weight:600;margin-bottom:0.3rem;">رصيد الحساب</div>
-                <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);">2500 ج.م</div>
+                <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);">2500 دولار</div>
             </div>
             <div class="user-info-card">
                 <div style="font-size:1rem;color:var(--primary-600);font-weight:600;margin-bottom:0.3rem;">رقم العضوية</div>

@@ -469,7 +469,7 @@ return [
         'code'                => 818,
         'precision'           => 2,
         'subunit'             => 100,
-        'symbol'              => 'ج.م',
+        'symbol'              => 'دولار',
         'symbol_first'        => true,
         'decimal_mark'        => '.',
         'thousands_separator' => ',',

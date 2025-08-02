@@ -511,9 +511,6 @@
                     $unlockedMarkets = is_string($userData->unlocked_markets ?? [1]) 
                         ? json_decode($userData->unlocked_markets, true) 
                         : ($userData->unlocked_markets ?? [1]);
-                    $purchasedProducts = is_string($userData->purchased_products ?? []) 
-                        ? json_decode($userData->purchased_products, true) 
-                        : ($userData->purchased_products ?? []);
                     $canAccess = $isOpenMarket ? true : in_array($market->id, $unlockedMarkets); // السوق المفتوح متاح دائماً للعرض
                 @endphp
                 
@@ -538,7 +535,7 @@
                                 @php
                                     $allPurchased = true;
                                     foreach($market->products as $product) {
-                                        if(!in_array($product->id, $purchasedProducts)) {
+                                        if(!in_array($product->id, $userData->purchased_products ?? [])) {
                                             $allPurchased = false;
                                             break;
                                         }
@@ -561,7 +558,7 @@
                                 @php
                                     $allPurchased = true;
                                     foreach($market->products as $product) {
-                                        if(!in_array($product->id, $purchasedProducts)) {
+                                        if(!in_array($product->id, $userData->purchased_products ?? [])) {
                                             $allPurchased = false;
                                             break;
                                         }
@@ -593,12 +590,12 @@
                         <div class="products-preview">
                             @foreach($market->products->take(4) as $index => $product)
                                 <div class="product-mini 
-                                    @if(in_array($product->id, $purchasedProducts ?? []))
+                                    @if(in_array($product->id, $userData->purchased_products ?? []))
                                         purchased
                                     @elseif($isOpenMarket)
                                         @if(($userData->balance ?? 50) >= 100) current @else locked @endif
                                     @elseif($canAccess)
-                                        @if($index == 0 || in_array($market->products[$index-1]->id, $purchasedProducts ?? []))
+                                        @if($index == 0 || in_array($market->products[$index-1]->id, $userData->purchased_products ?? []))
                                             current
                                         @else
                                             locked
@@ -608,11 +605,11 @@
                                     @endif
                                 ">
                                     <div class="product-mini-icon">
-                                        @if(in_array($product->id, $purchasedProducts ?? []))
+                                        @if(in_array($product->id, $userData->purchased_products ?? []))
                                             ✅
                                         @elseif($isOpenMarket)
                                             @if(($userData->balance ?? 50) >= 100) 💰 @else 👁️ @endif
-                                        @elseif($canAccess && ($index == 0 || in_array($market->products[$index-1]->id, $purchasedProducts ?? [])))
+                                        @elseif($canAccess && ($index == 0 || in_array($market->products[$index-1]->id, $userData->purchased_products ?? [])))
                                             📦
                                         @else
                                             🔒

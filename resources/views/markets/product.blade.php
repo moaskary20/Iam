@@ -407,11 +407,11 @@
                     <div class="pricing-section">
                         <div class="price-card purchase">
                             <div class="price-label">سعر الشراء</div>
-                            <div class="price-value">{{ number_format($product->purchase_price, 2) }} ج.م</div>
+                            <div class="price-value">{{ number_format($product->purchase_price, 2) }} دولار</div>
                         </div>
                         <div class="price-card selling">
                             <div class="price-label">سعر البيع المتوقع</div>
-                            <div class="price-value">{{ number_format($product->expected_selling_price, 2) }} ج.م</div>
+                            <div class="price-value">{{ number_format($product->expected_selling_price, 2) }} دولار</div>
                         </div>
                     </div>
                     
@@ -433,7 +433,7 @@
                                 </div>
                                 <div>
                                     <div class="commission-value">{{ $product->system_commission }}%</div>
-                                    <div class="commission-amount">{{ number_format($product->system_commission_amount, 2) }} ج.م</div>
+                                    <div class="commission-amount">{{ number_format($product->system_commission_amount, 2) }} دولار</div>
                                 </div>
                             </div>
                             <div class="commission-item">
@@ -445,7 +445,7 @@
                                 </div>
                                 <div>
                                     <div class="commission-value">{{ $product->marketing_commission }}%</div>
-                                    <div class="commission-amount">{{ number_format($product->marketing_commission_amount, 2) }} ج.م</div>
+                                    <div class="commission-amount">{{ number_format($product->marketing_commission_amount, 2) }} دولار</div>
                                 </div>
                             </div>
                         </div>

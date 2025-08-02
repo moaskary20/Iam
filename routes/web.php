@@ -27,7 +27,16 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/wallet', function () {
-    return view('wallet');
+    $user = auth()->user();
+    $wallet = $user->wallet ?? $user->wallet()->create(['balance' => $user->balance ?? 0]);
+    $transactions = $wallet->transactions()->latest()->take(10)->get();
+    
+    return view('wallet', [
+        'wallet' => $wallet,
+        'transactions' => $transactions,
+        'deposits' => $wallet->transactions()->where('type', 'deposit')->latest()->take(5)->get(),
+        'withdrawals' => $wallet->transactions()->where('type', 'withdraw')->latest()->take(5)->get(),
+    ]);
 })->middleware(['auth', 'verified'])->name('wallet');
 
 // Market Routes

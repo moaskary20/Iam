@@ -241,7 +241,7 @@
             <p class="product-market">{{ $product->market->name }}</p>
             <div class="product-price">
                 {{ number_format($product->purchase_price, 2) }}
-                @if($product->market_id == 5) دولار @else ج.م @endif
+                @if($product->market_id == 5) دولار @else دولار @endif
             </div>
         </div>
         

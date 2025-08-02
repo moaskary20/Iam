@@ -31,10 +31,12 @@ class ProgressiveMarketController extends Controller
         // Auto-unlock السوق المفتوح if user reached market 4
         if (($userData->current_market_id ?? 1) >= 4) {
             if ($user) {
-                $unlockedMarkets = $user->unlocked_markets ?? [1];
+                $unlockedMarkets = is_string($user->unlocked_markets ?? [1]) 
+                    ? json_decode($user->unlocked_markets, true) 
+                    : ($user->unlocked_markets ?? [1]);
                 if (!in_array(5, $unlockedMarkets)) {
                     $unlockedMarkets[] = 5;
-                    $user->unlocked_markets = $unlockedMarkets;
+                    $user->unlocked_markets = json_encode($unlockedMarkets);
                     $user->save();
                     $userData = $user; // Update userData
                 }
@@ -62,8 +64,13 @@ class ProgressiveMarketController extends Controller
             'balance' => 50.00 // رصيد افتراضي للمستخدم التجريبي
         ]);
         
+        // تحويل JSON strings إلى arrays
+        $unlockedMarkets = is_string($userData->unlocked_markets ?? [1]) 
+            ? json_decode($userData->unlocked_markets, true) 
+            : ($userData->unlocked_markets ?? [1]);
+        
         // Check if user can access this market (السوق المفتوح متاح دائماً للعرض)
-        if ($marketId != 5 && !in_array($marketId, $userData->unlocked_markets ?? [1])) {
+        if ($marketId != 5 && !in_array($marketId, $unlockedMarkets)) {
             return redirect()->route('progressive.market')->with('error', 'لا يمكنك الوصول لهذا السوق بعد!');
         }
         
@@ -81,13 +88,21 @@ class ProgressiveMarketController extends Controller
             $sellMethod = $request->input('sell_method'); // 'shipping', 'ai', 'social'
             
             if ($user) {
+                // تحويل JSON strings إلى arrays
+                $userUnlockedMarkets = is_string($user->unlocked_markets ?? [1]) 
+                    ? json_decode($user->unlocked_markets, true) 
+                    : ($user->unlocked_markets ?? [1]);
+                $userPurchasedProducts = is_string($user->purchased_products ?? []) 
+                    ? json_decode($user->purchased_products, true) 
+                    : ($user->purchased_products ?? []);
+                
                 // Check if user can access this product's market (السوق المفتوح متاح للعرض دائماً)
-                if ($product->market_id != 5 && !in_array($product->market_id, $user->unlocked_markets ?? [1])) {
+                if ($product->market_id != 5 && !in_array($product->market_id, $userUnlockedMarkets)) {
                     return response()->json(['success' => false, 'message' => 'لا يمكنك الوصول لهذا السوق بعد!'], 403);
                 }
                 
                 // Check if user already purchased this product
-                if (in_array($productId, $user->purchased_products ?? [])) {
+                if (in_array($productId, $userPurchasedProducts)) {
                     return response()->json(['success' => false, 'message' => 'تم شراء هذا المنتج مسبقاً!'], 400);
                 }
                 
@@ -144,10 +159,11 @@ class ProgressiveMarketController extends Controller
                 
                 $order = Order::create($orderData);
                 
+                $currency = $product->market_id == 5 ? 'دولار' : 'دولار';
                 $message = match($sellMethod) {
-                    'shipping' => 'تم شراء المنتج للشحن المنزلي! تم خصم ' . number_format($totalCost, 2) . ' دولار.',
-                    'ai' => 'تم تفعيل البيع بالذكاء الاصطناعي! تم خصم ' . number_format($totalCost, 2) . ' دولار (رسوم التسويق والعمولة).',
-                    'social' => 'تم تفعيل البيع عبر السوشيال ميديا! تم خصم ' . number_format($totalCost, 2) . ' دولار (رسوم التسويق والعمولة).',
+                    'shipping' => 'تم شراء المنتج للشحن المنزلي! تم خصم ' . number_format($totalCost, 2) . ' ' . $currency . '.',
+                    'ai' => 'تم تفعيل البيع بالذكاء الاصطناعي! تم خصم ' . number_format($totalCost, 2) . ' ' . $currency . ' (رسوم التسويق والعمولة).',
+                    'social' => 'تم تفعيل البيع عبر السوشيال ميديا! تم خصم ' . number_format($totalCost, 2) . ' ' . $currency . ' (رسوم التسويق والعمولة).',
                     default => 'تم شراء المنتج بنجاح!'
                 };
                 
@@ -239,10 +255,11 @@ class ProgressiveMarketController extends Controller
                 
                 $order = Order::create($orderData);
                 
+                $currency = $product->market_id == 5 ? 'دولار' : 'دولار';
                 $message = match($sellMethod) {
-                    'shipping' => 'تم شراء المنتج للشحن المنزلي! تم خصم ' . number_format($totalCost, 2) . ' دولار.',
-                    'ai' => 'تم تفعيل البيع بالذكاء الاصطناعي! تم خصم ' . number_format($totalCost, 2) . ' دولار (رسوم التسويق والعمولة).',
-                    'social' => 'تم تفعيل البيع عبر السوشيال ميديا! تم خصم ' . number_format($totalCost, 2) . ' دولار (رسوم التسويق والعمولة).',
+                    'shipping' => 'تم شراء المنتج للشحن المنزلي! تم خصم ' . number_format($totalCost, 2) . ' ' . $currency . '.',
+                    'ai' => 'تم تفعيل البيع بالذكاء الاصطناعي! تم خصم ' . number_format($totalCost, 2) . ' ' . $currency . ' (رسوم التسويق والعمولة).',
+                    'social' => 'تم تفعيل البيع عبر السوشيال ميديا! تم خصم ' . number_format($totalCost, 2) . ' ' . $currency . ' (رسوم التسويق والعمولة).',
                     default => 'تم شراء المنتج بنجاح!'
                 };
                 

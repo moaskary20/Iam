@@ -355,6 +355,13 @@
             color: #ff9800;
         }
 
+        .transaction-description {
+            color: #888;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 3px;
+        }
+
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -555,7 +562,7 @@
             <div class="balance-label">الرصيد الحالي</div>
             <div class="balance-amount">
                 <span class="balance-currency">$</span>
-                <span id="balance">2,450.75</span>
+                <span id="balance">{{ number_format($wallet->balance, 2) }}</span>
             </div>
         </div>
 
@@ -581,30 +588,21 @@
                 <span class="expand-icon" id="deposits-icon">▼</span>
             </div>
             <div class="section-content" id="deposits-content">
+                @forelse($deposits as $deposit)
                 <div class="transaction-item">
                     <div class="transaction-info">
-                        <div class="transaction-amount deposit-amount">+ $500.00</div>
-                        <div class="transaction-date">2025/07/29</div>
-                        <div class="transaction-time">03:45 PM</div>
+                        <div class="transaction-amount deposit-amount">+ ${{ number_format($deposit->amount, 2) }}</div>
+                        <div class="transaction-date">{{ $deposit->created_at->format('Y/m/d') }}</div>
+                        <div class="transaction-time">{{ $deposit->created_at->format('h:i A') }}</div>
                     </div>
                     <div class="transaction-status status-completed">مكتمل</div>
                 </div>
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-amount deposit-amount">+ $1,200.50</div>
-                        <div class="transaction-date">2025/07/28</div>
-                        <div class="transaction-time">11:20 AM</div>
-                    </div>
-                    <div class="transaction-status status-completed">مكتمل</div>
+                @empty
+                <div class="empty-state">
+                    <div class="empty-icon">💳</div>
+                    <p>لا توجد عمليات إيداع بعد</p>
                 </div>
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-amount deposit-amount">+ $750.25</div>
-                        <div class="transaction-date">2025/07/27</div>
-                        <div class="transaction-time">09:15 AM</div>
-                    </div>
-                    <div class="transaction-status status-pending">قيد المعالجة</div>
-                </div>
+                @endforelse
                 <button class="nav-btn" onclick="navigateToDeposit()">
                     إيداع جديد
                 </button>
@@ -621,22 +619,21 @@
                 <span class="expand-icon" id="withdrawals-icon">▼</span>
             </div>
             <div class="section-content" id="withdrawals-content">
+                @forelse($withdrawals as $withdrawal)
                 <div class="transaction-item">
                     <div class="transaction-info">
-                        <div class="transaction-amount withdraw-amount">- $300.00</div>
-                        <div class="transaction-date">2025/07/29</div>
-                        <div class="transaction-time">01:30 PM</div>
+                        <div class="transaction-amount withdraw-amount">- ${{ number_format($withdrawal->amount, 2) }}</div>
+                        <div class="transaction-date">{{ $withdrawal->created_at->format('Y/m/d') }}</div>
+                        <div class="transaction-time">{{ $withdrawal->created_at->format('h:i A') }}</div>
                     </div>
                     <div class="transaction-status status-completed">مكتمل</div>
                 </div>
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-amount withdraw-amount">- $150.00</div>
-                        <div class="transaction-date">2025/07/26</div>
-                        <div class="transaction-time">04:22 PM</div>
-                    </div>
-                    <div class="transaction-status status-completed">مكتمل</div>
+                @empty
+                <div class="empty-state">
+                    <div class="empty-icon">💸</div>
+                    <p>لا توجد عمليات سحب بعد</p>
                 </div>
+                @endforelse
                 <button class="nav-btn" onclick="navigateToWithdraw()">
                     سحب جديد
                 </button>
@@ -653,46 +650,29 @@
                 <span class="expand-icon" id="history-icon">▼</span>
             </div>
             <div class="section-content" id="history-content">
+                @forelse($transactions as $transaction)
                 <div class="transaction-item">
                     <div class="transaction-info">
-                        <div class="transaction-amount deposit-amount">+ $500.00</div>
-                        <div class="transaction-date">إيداع - 2025/07/29</div>
-                        <div class="transaction-time">03:45:22 PM</div>
+                        <div class="transaction-amount {{ $transaction->type == 'deposit' ? 'deposit-amount' : 'withdraw-amount' }}">
+                            {{ $transaction->type == 'deposit' ? '+' : '-' }} ${{ number_format($transaction->amount, 2) }}
+                        </div>
+                        <div class="transaction-date">
+                            {{ $transaction->type == 'deposit' ? 'إيداع' : 'سحب' }} - {{ $transaction->created_at->format('Y/m/d') }}
+                        </div>
+                        <div class="transaction-time">{{ $transaction->created_at->format('h:i:s A') }}</div>
+                        @if($transaction->description)
+                        <div class="transaction-description">{{ $transaction->description }}</div>
+                        @endif
                     </div>
                     <div class="transaction-status status-completed">مكتمل</div>
                 </div>
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-amount withdraw-amount">- $300.00</div>
-                        <div class="transaction-date">سحب - 2025/07/29</div>
-                        <div class="transaction-time">01:30:15 PM</div>
-                    </div>
-                    <div class="transaction-status status-completed">مكتمل</div>
+                @empty
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <p>لا توجد معاملات بعد</p>
+                    <p class="text-sm">ابدأ بإجراء عملية إيداع أو سحب</p>
                 </div>
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-amount deposit-amount">+ $1,200.50</div>
-                        <div class="transaction-date">إيداع - 2025/07/28</div>
-                        <div class="transaction-time">11:20:45 AM</div>
-                    </div>
-                    <div class="transaction-status status-completed">مكتمل</div>
-                </div>
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-amount deposit-amount">+ $750.25</div>
-                        <div class="transaction-date">إيداع - 2025/07/27</div>
-                        <div class="transaction-time">09:15:30 AM</div>
-                    </div>
-                    <div class="transaction-status status-pending">قيد المعالجة</div>
-                </div>
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-amount withdraw-amount">- $150.00</div>
-                        <div class="transaction-date">سحب - 2025/07/26</div>
-                        <div class="transaction-time">04:22:10 PM</div>
-                    </div>
-                    <div class="transaction-status status-completed">مكتمل</div>
-                </div>
+                @endforelse
             </div>
         </div>
     </div>
@@ -764,7 +744,7 @@
         // Animate balance counter
         function animateBalance() {
             const balanceElement = document.getElementById('balance');
-            const targetBalance = 2450.75;
+            const targetBalance = {{ $wallet->balance }};
             let currentBalance = 0;
             const increment = targetBalance / 60;
             

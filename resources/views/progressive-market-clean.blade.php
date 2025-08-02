@@ -3,45 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>السوق التدريجي - تطبيق IAM</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <title>السوق التدريجي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-50: #f0f9ff;
-            --primary-100: #e0f2fe;
-            --primary-200: #bae6fd;
-            --primary-300: #7dd3fc;
-            --primary-400: #38bdf8;
-            --primary-500: #0ea5e9;
-            --primary-600: #0284c7;
-            --primary-700: #0369a1;
-            --primary-800: #075985;
-            --primary-900: #0c4a6e;
-            
-            --success-500: #22c55e;
+            --primary-50: #eff6ff;
+            --primary-500: #3b82f6;
+            --primary-600: #2563eb;
             --warning-500: #f59e0b;
-            --error-500: #ef4444;
-            --purple-500: #8b5cf6;
-            
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --text-primary: #0f172a;
-            --text-secondary: #334155;
-            --text-tertiary: #64748b;
-            --border-color: #e2e8f0;
-            
-            --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-            --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         * {
@@ -52,98 +26,92 @@
         
         body {
             font-family: 'Cairo', sans-serif;
-            background: var(--gradient-purple);
-            color: var(--text-primary);
-            line-height: 1.6;
+            background: var(--gradient-primary);
             min-height: 100vh;
+            color: var(--gray-900);
+            direction: rtl;
         }
         
         .header {
-            background: var(--gradient-purple);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
             padding: 2rem 0;
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            animation: float 20s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .header-content {
-            position: relative;
-            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
         
         .main-title {
             font-size: 3rem;
-            font-weight: 900;
-            color: white;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-            margin-bottom: 1rem;
-            animation: slideDown 0.8s ease-out;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: slideDown 1s ease-out;
         }
         
         .subtitle {
             font-size: 1.2rem;
-            color: rgba(255,255,255,0.9);
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.9);
             margin-bottom: 2rem;
-            animation: slideDown 0.8s ease-out 0.2s both;
+            animation: slideUp 1s ease-out;
         }
         
         .progress-indicator {
-            display: inline-flex;
-            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             border-radius: 2rem;
             padding: 1rem 2rem;
-            gap: 0.5rem;
-            animation: slideDown 0.8s ease-out 0.4s both;
+            margin: 0 auto;
+            max-width: fit-content;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .progress-step {
-            width: 2rem;
-            height: 2rem;
+            width: 3rem;
+            height: 3rem;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            position: relative;
             transition: all 0.3s ease;
         }
         
-        .progress-step.completed {
-            background: var(--success-500);
-            color: white;
-        }
-        
         .progress-step.current {
-            background: var(--warning-500);
+            background: var(--gradient-warning);
             color: white;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
             animation: pulse 2s infinite;
         }
         
+        .progress-step.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+        
         .progress-step.locked {
-            background: rgba(255,255,255,0.3);
-            color: rgba(255,255,255,0.7);
+            background: rgba(107, 114, 128, 0.3);
+            color: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
         }
         
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(245, 158, 11, 0.8); }
         }
         
         .container {
@@ -154,56 +122,69 @@
         
         .markets-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 2rem;
-            margin-top: 2rem;
+            animation: slideUp 1s ease-out 0.5s both;
         }
         
         .market-card {
-            background: var(--bg-primary);
+            background: white;
             border-radius: 1.5rem;
+            box-shadow: var(--shadow-lg);
             overflow: hidden;
-            box-shadow: var(--shadow-xl);
-            transition: all 0.4s ease;
+            transition: all 0.3s ease;
             position: relative;
-            animation: slideUp 0.8s ease-out;
-            animation-fill-mode: both;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .market-card:nth-child(1) { animation-delay: 0.1s; }
-        .market-card:nth-child(2) { animation-delay: 0.2s; }
-        .market-card:nth-child(3) { animation-delay: 0.3s; }
-        .market-card:nth-child(4) { animation-delay: 0.4s; }
-        .market-card:nth-child(5) { animation-delay: 0.5s; }
-        
-        .market-card.unlocked {
-            cursor: pointer;
-        }
-        
-        .market-card.unlocked:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-xl), 0 25px 50px rgba(0,0,0,0.15);
+        .market-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
         
         .market-card.locked {
-            opacity: 0.6;
-            filter: grayscale(0.8);
+            opacity: 0.7;
+            filter: grayscale(30%);
         }
         
-        .market-card.locked::before {
-            content: '';
+        .market-status {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.3);
+            top: 1rem;
+            right: 1rem;
             z-index: 2;
-            border-radius: 1.5rem;
+        }
+        
+        .status-badge {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-badge.current {
+            background: var(--gradient-warning);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-badge.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .status-badge.locked {
+            background: rgba(107, 114, 128, 0.8);
         }
         
         .market-header {
             background: var(--gradient-primary);
+            color: white;
             padding: 2rem;
             text-align: center;
             position: relative;
@@ -217,63 +198,37 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: shine 3s infinite;
+            background: repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg 10deg, rgba(255,255,255,0.1) 10deg 20deg);
+            animation: rotate 20s linear infinite;
+            opacity: 0.3;
         }
         
-        @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%); }
-            100% { transform: translateX(100%) translateY(100%); }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         
         .market-icon {
-            font-size: 3rem;
+            font-size: 4rem;
             margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
         }
         
         .market-name {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            color: white;
             margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
         }
         
         .market-description {
-            color: rgba(255,255,255,0.9);
-            font-size: 0.9rem;
-        }
-        
-        .market-status {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            z-index: 3;
-        }
-        
-        .status-badge {
-            background: var(--success-500);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .status-badge.locked {
-            background: var(--error-500);
-        }
-        
-        .status-badge.current {
-            background: var(--warning-500);
-            animation: glow 2s infinite;
-        }
-        
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); }
-            50% { box-shadow: 0 0 30px rgba(245, 158, 11, 0.8); }
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
         }
         
         .market-content {
@@ -282,21 +237,39 @@
         
         .products-preview {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
         
         .product-mini {
-            background: var(--bg-secondary);
-            border-radius: 0.75rem;
+            background: #f8fafc;
+            border-radius: 1rem;
             padding: 1rem;
             text-align: center;
             transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-mini::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .product-mini:hover::before {
+            left: 100%;
         }
         
         .product-mini.purchased {
-            background: linear-gradient(135deg, var(--success-500), #16a34a);
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
         
@@ -511,9 +484,6 @@
                     $unlockedMarkets = is_string($userData->unlocked_markets ?? [1]) 
                         ? json_decode($userData->unlocked_markets, true) 
                         : ($userData->unlocked_markets ?? [1]);
-                    $purchasedProducts = is_string($userData->purchased_products ?? []) 
-                        ? json_decode($userData->purchased_products, true) 
-                        : ($userData->purchased_products ?? []);
                     $canAccess = $isOpenMarket ? true : in_array($market->id, $unlockedMarkets); // السوق المفتوح متاح دائماً للعرض
                 @endphp
                 
@@ -538,7 +508,7 @@
                                 @php
                                     $allPurchased = true;
                                     foreach($market->products as $product) {
-                                        if(!in_array($product->id, $purchasedProducts)) {
+                                        if(!in_array($product->id, $userData->purchased_products ?? [])) {
                                             $allPurchased = false;
                                             break;
                                         }
@@ -551,7 +521,7 @@
                                 <span>🔒</span> مقفل
                             @elseif($isOpenMarket)
                                 @if(($userData->balance ?? 50) >= 100)
-                                    <span>�</span> متاح للشراء
+                                    <span>🛒</span> متاح للشراء
                                 @else
                                     <span>👁️</span> للعرض فقط
                                 @endif
@@ -561,7 +531,7 @@
                                 @php
                                     $allPurchased = true;
                                     foreach($market->products as $product) {
-                                        if(!in_array($product->id, $purchasedProducts)) {
+                                        if(!in_array($product->id, $userData->purchased_products ?? [])) {
                                             $allPurchased = false;
                                             break;
                                         }
@@ -593,12 +563,12 @@
                         <div class="products-preview">
                             @foreach($market->products->take(4) as $index => $product)
                                 <div class="product-mini 
-                                    @if(in_array($product->id, $purchasedProducts ?? []))
+                                    @if(in_array($product->id, $userData->purchased_products ?? []))
                                         purchased
                                     @elseif($isOpenMarket)
                                         @if(($userData->balance ?? 50) >= 100) current @else locked @endif
                                     @elseif($canAccess)
-                                        @if($index == 0 || in_array($market->products[$index-1]->id, $purchasedProducts ?? []))
+                                        @if($index == 0 || in_array($market->products[$index-1]->id, $userData->purchased_products ?? []))
                                             current
                                         @else
                                             locked
@@ -608,11 +578,11 @@
                                     @endif
                                 ">
                                     <div class="product-mini-icon">
-                                        @if(in_array($product->id, $purchasedProducts ?? []))
+                                        @if(in_array($product->id, $userData->purchased_products ?? []))
                                             ✅
                                         @elseif($isOpenMarket)
                                             @if(($userData->balance ?? 50) >= 100) 💰 @else 👁️ @endif
-                                        @elseif($canAccess && ($index == 0 || in_array($market->products[$index-1]->id, $purchasedProducts ?? [])))
+                                        @elseif($canAccess && ($index == 0 || in_array($market->products[$index-1]->id, $userData->purchased_products ?? [])))
                                             📦
                                         @else
                                             🔒

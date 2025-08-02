@@ -361,11 +361,11 @@
                         <div class="product-prices">
                             <div class="price-item purchase">
                                 <div class="price-label">سعر الشراء</div>
-                                <div class="price-value">{{ number_format($product->purchase_price, 2) }} ج.م</div>
+                                <div class="price-value">{{ number_format($product->purchase_price, 2) }} دولار</div>
                             </div>
                             <div class="price-item selling">
                                 <div class="price-label">سعر البيع المتوقع</div>
-                                <div class="price-value">{{ number_format($product->expected_selling_price, 2) }} ج.م</div>
+                                <div class="price-value">{{ number_format($product->expected_selling_price, 2) }} دولار</div>
                             </div>
                         </div>
                         

@@ -59,7 +59,7 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('purchase_price')
                     ->label('سعر الشراء')
                     ->numeric()
-                    ->prefix('ج.م')
+                    ->prefix('$')
                     ->required()
                     ->live(onBlur: true)
                     ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, ?string $state) {
@@ -71,7 +71,7 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('expected_selling_price')
                     ->label('سعر البيع المتوقع')
                     ->numeric()
-                    ->prefix('ج.م')
+                    ->prefix('$')
                     ->required()
                     ->readOnly(),
                 Forms\Components\TextInput::make('system_commission')
@@ -113,13 +113,13 @@ class ProductResource extends Resource
                     ->stacked()
                     ->limit(3),
                 Tables\Columns\TextColumn::make('purchase_price')
-                    ->label('سعر الشراء')
-                    ->money('EGP')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('expected_selling_price')
-                    ->label('سعر البيع المتوقع')
-                    ->money('EGP')
-                    ->sortable(),
+                ->label('سعر الشراء')
+                ->money('USD')
+                ->sortable(),
+            Tables\Columns\TextColumn::make('expected_selling_price')
+                ->label('سعر البيع المتوقع')
+                ->money('USD')
+                ->sortable(),
                 Tables\Columns\TextColumn::make('system_commission')
                     ->label('عمولة النظام')
                     ->suffix('%'),

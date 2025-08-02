@@ -562,11 +562,11 @@
                         <div class="pricing-section">
                             <div class="price-item">
                                 <div class="price-label">سعر الشراء</div>
-                                <div class="price-value">{{ number_format($product->purchase_price, 2) }} @if($isOpenMarket) دولار @else ج.م @endif</div>
+                                <div class="price-value">{{ number_format($product->purchase_price, 2) }} @if($isOpenMarket) دولار @else دولار @endif</div>
                             </div>
                             <div class="price-item">
                                 <div class="price-label">سعر البيع المتوقع</div>
-                                <div class="price-value">{{ number_format($product->expected_selling_price, 2) }} @if($isOpenMarket) دولار @else ج.م @endif</div>
+                                <div class="price-value">{{ number_format($product->expected_selling_price, 2) }} @if($isOpenMarket) دولار @else دولار @endif</div>
                             </div>
                         </div>
                         
@@ -583,12 +583,12 @@
                                 <span>✅ تم الشراء بالفعل</span>
                             </button>
                         @elseif($isAvailable)
-                            <button class="purchase-btn available" onclick="showSellMethodPopup({{ $product->id }}, {{ $product->purchase_price }}, '{{ $isOpenMarket ? "دولار" : "ج.م" }}')">
-                                <span>شراء بـ {{ number_format($product->purchase_price, 2) }} @if($isOpenMarket) دولار @else ج.م @endif</span>
+                            <button class="purchase-btn available" onclick="showSellMethodPopup({{ $product->id }}, {{ $product->purchase_price }}, '{{ $isOpenMarket ? "دولار" : "دولار" }}')">
+                                <span>شراء بـ {{ number_format($product->purchase_price, 2) }} @if($isOpenMarket) دولار @else دولار @endif</span>
                             </button>
                         @elseif($insufficientBalance)
                             <button class="purchase-btn insufficient-balance">
-                                <span>💰 رصيد غير كافي ({{ number_format($product->purchase_price, 2) }} دولار)</span>
+                                <span>💰 رصيد غير كافي ({{ number_format($product->purchase_price, 2) }} @if($isOpenMarket) دولار @else دولار @endif)</span>
                             </button>
                         @else
                             <button class="purchase-btn locked">
@@ -932,7 +932,7 @@
                     <h4>الشحن للمنزل</h4>
                     <p>شراء المنتج وشحنه إلى عنوانك</p>
                     <div class="method-price">
-                        <span id="method-shipping-price">0.00 ج.م</span>
+                        <span id="method-shipping-price">0.00 دولار</span>
                     </div>
                 </div>
                 
@@ -941,7 +941,7 @@
                     <h4>البيع بالذكاء الاصطناعي</h4>
                     <p>رسوم التسويق والعمولة فقط</p>
                     <div class="method-price">
-                        <span id="method-ai-price">0.00 ج.م</span>
+                        <span id="method-ai-price">0.00 دولار</span>
                         <small>(رسوم فقط)</small>
                     </div>
                 </div>
@@ -951,7 +951,7 @@
                     <h4>البيع عبر السوشيال ميديا</h4>
                     <p>احصل على رابط للمشاركة</p>
                     <div class="method-price">
-                        <span id="method-social-price">0.00 ج.م</span>
+                        <span id="method-social-price">0.00 دولار</span>
                         <small>(رسوم فقط)</small>
                     </div>
                 </div>
