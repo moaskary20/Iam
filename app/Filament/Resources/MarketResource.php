@@ -25,7 +25,7 @@ class MarketResource extends Resource
     
     protected static ?string $pluralModelLabel = 'الأسواق';
     
-    protected static ?string $navigationGroup = 'إدارة الأسواق';
+    protected static ?string $navigationGroup = 'إدارة المحتوى';
     
     protected static ?int $navigationSort = 1;
 
