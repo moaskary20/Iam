@@ -466,15 +466,33 @@
             <div class="progress-indicator">
                 @for($i = 1; $i <= 5; $i++)
                     <div class="progress-step 
-                        @if(in_array($i, $userData->unlocked_markets ?? [1]))
+                        @if($i == 5)
+                            @if(in_array(5, $userData->unlocked_markets ?? [1]) || ($userData->current_market_id ?? 1) >= 4) completed @else locked @endif
+                        @elseif(in_array($i, $userData->unlocked_markets ?? [1]))
                             @if($i == $userData->current_market_id) current @else completed @endif
                         @else
                             locked
                         @endif
                     ">
-                        {{ $i }}
+                        @if($i == 5)
+                            🏪
+                        @else
+                            {{ $i }}
+                        @endif
                     </div>
                 @endfor
+            </div>
+            
+            <!-- عرض الرصيد -->
+            <div class="balance-display" style="margin-top: 1rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 1rem; padding: 1rem 2rem; display: inline-block;">
+                <div style="color: white; font-size: 1rem; font-weight: 600;">
+                    💰 رصيدك الحالي: {{ number_format($userData->balance ?? 50, 2) }} دولار
+                </div>
+                @if(($userData->balance ?? 50) < 100)
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.8rem; margin-top: 0.25rem;">
+                        تحتاج 100 دولار للشراء من السوق المفتوح
+                    </div>
+                @endif
             </div>
         </div>
     </header>
@@ -483,8 +501,13 @@
     <main class="container">
         <div class="markets-grid">
             @foreach($markets as $market)
-                <div class="market-card @if(in_array($market->id, $userData->unlocked_markets ?? [1])) unlocked @else locked @endif">
-                    @if(!in_array($market->id, $userData->unlocked_markets ?? [1]))
+                @php
+                    $isOpenMarket = $market->id == 5; // السوق المفتوح
+                    $canAccess = $isOpenMarket ? true : in_array($market->id, $userData->unlocked_markets ?? [1]); // السوق المفتوح متاح دائماً للعرض
+                @endphp
+                
+                <div class="market-card @if($canAccess) unlocked @else locked @endif">
+                    @if(!$canAccess)
                         <div class="lock-overlay">
                             <div class="lock-icon">🔒</div>
                             <div class="lock-message">سوق مقفل</div>
@@ -494,8 +517,10 @@
                     
                     <div class="market-status">
                         <div class="status-badge 
-                            @if(!in_array($market->id, $userData->unlocked_markets ?? [1]))
+                            @if(!$canAccess)
                                 locked
+                            @elseif($isOpenMarket)
+                                @if(($userData->balance ?? 50) >= 100) current @else locked @endif
                             @elseif($market->id == $userData->current_market_id)
                                 current
                             @else
@@ -511,8 +536,14 @@
                                 @if($allPurchased) completed @else current @endif
                             @endif
                         ">
-                            @if(!in_array($market->id, $userData->unlocked_markets ?? [1]))
+                            @if(!$canAccess)
                                 <span>🔒</span> مقفل
+                            @elseif($isOpenMarket)
+                                @if(($userData->balance ?? 50) >= 100)
+                                    <span>�</span> متاح للشراء
+                                @else
+                                    <span>👁️</span> للعرض فقط
+                                @endif
                             @elseif($market->id == $userData->current_market_id)
                                 <span>⚡</span> نشط
                             @else
@@ -537,7 +568,14 @@
                     <div class="market-header">
                         <div class="market-icon">{{ $market->icon ?? '🏪' }}</div>
                         <h3 class="market-name">{{ $market->name }}</h3>
-                        <p class="market-description">{{ $market->description }}</p>
+                        <p class="market-description">
+                            {{ $market->description }}
+                            @if($isOpenMarket)
+                                <br><small style="color: rgba(255,255,255,0.8);">
+                                    مفتوح للعرض دائماً - يتطلب رصيد 100 دولار للشراء
+                                </small>
+                            @endif
+                        </p>
                     </div>
                     
                     <div class="market-content">
@@ -546,7 +584,9 @@
                                 <div class="product-mini 
                                     @if(in_array($product->id, $userData->purchased_products ?? []))
                                         purchased
-                                    @elseif(in_array($market->id, $userData->unlocked_markets ?? [1]))
+                                    @elseif($isOpenMarket)
+                                        @if(($userData->balance ?? 50) >= 100) current @else locked @endif
+                                    @elseif($canAccess)
                                         @if($index == 0 || in_array($market->products[$index-1]->id, $userData->purchased_products ?? []))
                                             current
                                         @else
@@ -559,7 +599,9 @@
                                     <div class="product-mini-icon">
                                         @if(in_array($product->id, $userData->purchased_products ?? []))
                                             ✅
-                                        @elseif(in_array($market->id, $userData->unlocked_markets ?? [1]) && ($index == 0 || in_array($market->products[$index-1]->id, $userData->purchased_products ?? [])))
+                                        @elseif($isOpenMarket)
+                                            @if(($userData->balance ?? 50) >= 100) 💰 @else 👁️ @endif
+                                        @elseif($canAccess && ($index == 0 || in_array($market->products[$index-1]->id, $userData->purchased_products ?? [])))
                                             📦
                                         @else
                                             🔒
@@ -570,9 +612,19 @@
                             @endforeach
                         </div>
                         
-                        @if(in_array($market->id, $userData->unlocked_markets ?? [1]))
+                        @if($canAccess)
                             <button class="enter-market-btn" onclick="window.location.href='{{ route('progressive.market.show', $market->id) }}'">
-                                <span>دخول السوق</span>
+                                @if($isOpenMarket)
+                                    <span>
+                                        @if(($userData->balance ?? 50) >= 100)
+                                            💰 دخول السوق المفتوح
+                                        @else
+                                            👁️ تصفح السوق المفتوح
+                                        @endif
+                                    </span>
+                                @else
+                                    <span>دخول السوق</span>
+                                @endif
                             </button>
                         @else
                             <button class="enter-market-btn" disabled>

@@ -141,6 +141,12 @@
             border: 2px solid var(--success-500);
         }
         
+        .product-card.insufficient-balance {
+            opacity: 0.8;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 2px solid var(--warning-500);
+        }
+        
         .product-card.locked {
             opacity: 0.4;
             filter: grayscale(1) blur(3px);
@@ -196,6 +202,11 @@
         .status-badge.available {
             background: var(--warning-500);
             animation: glow 2s infinite;
+        }
+        
+        .status-badge.insufficient-balance {
+            background: var(--warning-500);
+            animation: pulse 2s infinite;
         }
         
         .status-badge.locked {
@@ -327,6 +338,12 @@
             cursor: default;
         }
         
+        .purchase-btn.insufficient-balance {
+            background: var(--warning-500);
+            color: white;
+            cursor: not-allowed;
+        }
+        
         .purchase-btn.locked {
             background: #9ca3af;
             color: white;
@@ -448,7 +465,18 @@
             
             <div class="market-info">
                 <h1 class="market-title">{{ $market->icon ?? '🏪' }} {{ $market->name }}</h1>
-                <p class="market-subtitle">{{ $market->description }}</p>
+                <p class="market-subtitle">
+                    {{ $market->description }}
+                    @if($market->id == 5)
+                        <br>
+                        <span style="font-size: 0.9rem; background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 1rem; margin-top: 0.5rem; display: inline-block;">
+                            💰 رصيدك: {{ number_format($userData->balance ?? 50, 2) }} دولار
+                            @if(($userData->balance ?? 50) < 100)
+                                | ⚠️ يتطلب 100 دولار للشراء
+                            @endif
+                        </span>
+                    @endif
+                </p>
             </div>
             
             <div style="width: 120px;"></div> <!-- Spacer for centering -->
@@ -461,13 +489,27 @@
             @foreach($products as $index => $product)
                 @php
                     $isPurchased = in_array($product->id, $userData->purchased_products ?? []);
-                    $isAvailable = $index == 0 || in_array($products[$index-1]->id, $userData->purchased_products ?? []);
-                    $isLocked = !$isPurchased && !$isAvailable;
+                    $isOpenMarket = $market->id == 5; // السوق المفتوح
+                    
+                    if ($isOpenMarket) {
+                        // في السوق المفتوح: جميع المنتجات مرئية، لكن الشراء يتطلب رصيد 100 دولار
+                        $isAvailable = ($userData->balance ?? 50) >= 100 && !$isPurchased;
+                        $isLocked = false; // لا توجد منتجات مقفلة في السوق المفتوح
+                        $canView = true; // يمكن رؤية كل شيء
+                        $insufficientBalance = ($userData->balance ?? 50) < 100 && !$isPurchased;
+                    } else {
+                        // في الأسواق العادية: النظام التدريجي العادي
+                        $isAvailable = $index == 0 || in_array($products[$index-1]->id, $userData->purchased_products ?? []);
+                        $isLocked = !$isPurchased && !$isAvailable;
+                        $canView = !$isLocked;
+                        $insufficientBalance = false;
+                    }
                 @endphp
                 
                 <div class="product-card 
                     @if($isPurchased) purchased 
                     @elseif($isAvailable) available 
+                    @elseif($insufficientBalance) insufficient-balance
                     @else locked 
                     @endif
                 ">
@@ -477,12 +519,19 @@
                             <div class="lock-message">منتج مقفل</div>
                             <div class="unlock-hint">اشترِ المنتج السابق أولاً</div>
                         </div>
+                    @elseif($insufficientBalance)
+                        <div class="lock-overlay" style="background: rgba(245, 158, 11, 0.9);">
+                            <div class="lock-icon" style="animation: none;">💰</div>
+                            <div class="lock-message">رصيد غير كافي</div>
+                            <div class="unlock-hint">تحتاج {{ 100 - ($userData->balance ?? 50) }} دولار إضافي</div>
+                        </div>
                     @endif
                     
                     <div class="product-status">
                         <div class="status-badge 
                             @if($isPurchased) purchased 
                             @elseif($isAvailable) available 
+                            @elseif($insufficientBalance) insufficient-balance
                             @else locked 
                             @endif
                         ">
@@ -490,6 +539,8 @@
                                 <span>✅</span> تم الشراء
                             @elseif($isAvailable)
                                 <span>⚡</span> متاح الآن
+                            @elseif($insufficientBalance)
+                                <span>💰</span> رصيد غير كافي
                             @else
                                 <span>🔒</span> مقفل
                             @endif
@@ -511,11 +562,11 @@
                         <div class="pricing-section">
                             <div class="price-item">
                                 <div class="price-label">سعر الشراء</div>
-                                <div class="price-value">{{ number_format($product->purchase_price, 2) }} ج.م</div>
+                                <div class="price-value">{{ number_format($product->purchase_price, 2) }} @if($isOpenMarket) دولار @else ج.م @endif</div>
                             </div>
                             <div class="price-item">
                                 <div class="price-label">سعر البيع المتوقع</div>
-                                <div class="price-value">{{ number_format($product->expected_selling_price, 2) }} ج.م</div>
+                                <div class="price-value">{{ number_format($product->expected_selling_price, 2) }} @if($isOpenMarket) دولار @else ج.م @endif</div>
                             </div>
                         </div>
                         
@@ -533,7 +584,11 @@
                             </button>
                         @elseif($isAvailable)
                             <button class="purchase-btn available" onclick="purchaseProduct({{ $product->id }}, this)">
-                                <span>شراء بـ {{ number_format($product->purchase_price, 2) }} ج.م</span>
+                                <span>شراء بـ {{ number_format($product->purchase_price, 2) }} @if($isOpenMarket) دولار @else ج.م @endif</span>
+                            </button>
+                        @elseif($insufficientBalance)
+                            <button class="purchase-btn insufficient-balance">
+                                <span>💰 رصيد غير كافي ({{ number_format($product->purchase_price, 2) }} دولار)</span>
                             </button>
                         @else
                             <button class="purchase-btn locked">
