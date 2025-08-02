@@ -813,4 +813,9 @@
         // Initialize
         revealOnScroll();
     </script>
-@endsection
+    <div class="d-block d-md-none">
+        <x-mobile-nav />
+    </div>
+</body>
+
+</html>
