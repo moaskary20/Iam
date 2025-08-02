@@ -57,6 +57,24 @@ class User extends Authenticatable implements FilamentUser
                 } while (self::where('invite_code', $code)->exists());
                 $user->invite_code = $code;
             }
+            
+            // تعيين name تلقائياً إذا لم يكن موجود
+            if (empty($user->name)) {
+                $user->name = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+                if (empty($user->name)) {
+                    $user->name = $user->email; // كحل احتياطي
+                }
+            }
+        });
+        
+        static::updating(function ($user) {
+            // تحديث name عند تحديث first_name أو last_name
+            if ($user->isDirty(['first_name', 'last_name']) && empty($user->name)) {
+                $user->name = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+                if (empty($user->name)) {
+                    $user->name = $user->email;
+                }
+            }
         });
     }
     /**
@@ -72,11 +90,17 @@ class User extends Authenticatable implements FilamentUser
         'phone',
         'country',
         'password',
+        'email_verified_at',
         'invite_code',
         'is_verified',
         'profile_photo',
         'id_image_path',
         'verification_status',
+        'current_market_id',
+        'current_product_index',
+        'purchased_products',
+        'unlocked_markets',
+        'balance',
     ];
 
     /**

@@ -36,12 +36,41 @@ class UserResource extends Resource
                 Forms\Components\Section::make('المعلومات الأساسية')
                     ->schema([
                         Forms\Components\TextInput::make('first_name')
-                            ->label('الاسم الأول'),
+                            ->label('الاسم الأول')
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, $set, $get) {
+                                $firstName = $state ?? '';
+                                $lastName = $get('last_name') ?? '';
+                                $fullName = trim($firstName . ' ' . $lastName);
+                                if (!empty($fullName)) {
+                                    $set('name', $fullName);
+                                }
+                            }),
                         Forms\Components\TextInput::make('last_name')
-                            ->label('الاسم الأخير'),
+                            ->label('الاسم الأخير')
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, $set, $get) {
+                                $firstName = $get('first_name') ?? '';
+                                $lastName = $state ?? '';
+                                $fullName = trim($firstName . ' ' . $lastName);
+                                if (!empty($fullName)) {
+                                    $set('name', $fullName);
+                                }
+                            }),
                         Forms\Components\TextInput::make('name')
                             ->label('الاسم الكامل')
-                            ->required(),
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, $set, $get) {
+                                if (empty($state)) {
+                                    $firstName = $get('first_name') ?? '';
+                                    $lastName = $get('last_name') ?? '';
+                                    $fullName = trim($firstName . ' ' . $lastName);
+                                    if (!empty($fullName)) {
+                                        $set('name', $fullName);
+                                    }
+                                }
+                            }),
                         Forms\Components\TextInput::make('email')
                             ->label('البريد الإلكتروني')
                             ->email()
