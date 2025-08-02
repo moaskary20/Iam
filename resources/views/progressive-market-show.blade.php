@@ -583,7 +583,7 @@
                                 <span>✅ تم الشراء بالفعل</span>
                             </button>
                         @elseif($isAvailable)
-                            <button class="purchase-btn available" onclick="purchaseProduct({{ $product->id }}, this)">
+                            <button class="purchase-btn available" onclick="showSellMethodPopup({{ $product->id }}, {{ $product->purchase_price }}, '{{ $isOpenMarket ? "دولار" : "ج.م" }}')">
                                 <span>شراء بـ {{ number_format($product->purchase_price, 2) }} @if($isOpenMarket) دولار @else ج.م @endif</span>
                             </button>
                         @elseif($insufficientBalance)
@@ -779,6 +779,531 @@
             `;
             document.head.appendChild(breatheStyle);
         });
+
+        // Sell Method Popup Functions
+        function showSellMethodPopup(productId, productPrice, currency) {
+            currentProductId = productId;
+            currentProductPrice = productPrice;
+            currentCurrency = currency;
+            
+            const marketingFee = productPrice * 0.1;
+            const systemCommission = productPrice * 0.05;
+            const totalFees = marketingFee + systemCommission;
+            
+            document.getElementById('method-shipping-price').textContent = `${productPrice.toFixed(2)} ${currency}`;
+            document.getElementById('method-ai-price').textContent = `${totalFees.toFixed(2)} ${currency}`;
+            document.getElementById('method-social-price').textContent = `${totalFees.toFixed(2)} ${currency}`;
+            
+            document.getElementById('sellMethodPopup').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeSellMethodPopup() {
+            document.getElementById('sellMethodPopup').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        function selectSellMethod(method) {
+            if (method === 'shipping') {
+                closeSellMethodPopup();
+                showShippingPopup();
+            } else if (method === 'ai') {
+                closeSellMethodPopup();
+                processPurchase(currentProductId, 'ai');
+            } else if (method === 'social') {
+                closeSellMethodPopup();
+                processPurchase(currentProductId, 'social');
+            }
+        }
+        
+        function showShippingPopup() {
+            document.getElementById('shippingPopup').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeShippingPopup() {
+            document.getElementById('shippingPopup').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        function processShippingOrder() {
+            const phone = document.getElementById('phone').value;
+            const country = document.getElementById('country').value;
+            const address = document.getElementById('address').value;
+            const paymentMethod = document.getElementById('payment-method').value;
+            
+            if (!phone || !country || !address || !paymentMethod) {
+                alert('يرجى ملء جميع الحقول');
+                return;
+            }
+            
+            closeShippingPopup();
+            processPurchase(currentProductId, 'shipping', {
+                phone, country, address, paymentMethod
+            });
+        }
+        
+        let currentProductId = null;
+        let currentProductPrice = null;
+        let currentCurrency = null;
+        
+        function processPurchase(productId, sellMethod, shippingData = null) {
+            const formData = new FormData();
+            formData.append('sell_method', sellMethod);
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
+            if (shippingData) {
+                Object.keys(shippingData).forEach(key => {
+                    formData.append(key, shippingData[key]);
+                });
+            }
+            
+            fetch(`/progressive-market/purchase/${productId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.share_link) {
+                        showShareLinkPopup(data.share_link);
+                    } else {
+                        alert(data.message);
+                        location.reload();
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء المعالجة');
+            });
+        }
+        
+        function showShareLinkPopup(shareLink) {
+            document.getElementById('shareLink').value = shareLink;
+            document.getElementById('shareLinkPopup').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeShareLinkPopup() {
+            document.getElementById('shareLinkPopup').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            location.reload();
+        }
+        
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            alert('تم نسخ الرابط!');
+        }
+        
+        function shareToWhatsApp() {
+            const shareLink = document.getElementById('shareLink').value;
+            const message = `🛍️ منتج رائع للبيع!\n\nتفضل بزيارة الرابط:\n${shareLink}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        }
+        
+        function shareToFacebook() {
+            const shareLink = document.getElementById('shareLink').value;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareLink)}`, '_blank');
+        }
+        
+        function shareToTwitter() {
+            const shareLink = document.getElementById('shareLink').value;
+            const message = `🛍️ منتج رائع للبيع! تفضل بزيارة الرابط:`;
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}&url=${encodeURIComponent(shareLink)}`, '_blank');
+        }
     </script>
+
+    <!-- Sell Method Selection Popup -->
+    <div id="sellMethodPopup" class="popup-overlay">
+        <div class="popup-content sell-method-popup">
+            <div class="popup-header">
+                <h3>🛍️ اختر طريقة البيع</h3>
+                <button class="close-btn" onclick="closeSellMethodPopup()">×</button>
+            </div>
+            
+            <div class="sell-methods">
+                <div class="sell-method-card" onclick="selectSellMethod('shipping')">
+                    <div class="method-icon">🚚</div>
+                    <h4>الشحن للمنزل</h4>
+                    <p>شراء المنتج وشحنه إلى عنوانك</p>
+                    <div class="method-price">
+                        <span id="method-shipping-price">0.00 ج.م</span>
+                    </div>
+                </div>
+                
+                <div class="sell-method-card" onclick="selectSellMethod('ai')">
+                    <div class="method-icon">🤖</div>
+                    <h4>البيع بالذكاء الاصطناعي</h4>
+                    <p>رسوم التسويق والعمولة فقط</p>
+                    <div class="method-price">
+                        <span id="method-ai-price">0.00 ج.م</span>
+                        <small>(رسوم فقط)</small>
+                    </div>
+                </div>
+                
+                <div class="sell-method-card" onclick="selectSellMethod('social')">
+                    <div class="method-icon">📱</div>
+                    <h4>البيع عبر السوشيال ميديا</h4>
+                    <p>احصل على رابط للمشاركة</p>
+                    <div class="method-price">
+                        <span id="method-social-price">0.00 ج.م</span>
+                        <small>(رسوم فقط)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shipping Details Popup -->
+    <div id="shippingPopup" class="popup-overlay">
+        <div class="popup-content shipping-popup">
+            <div class="popup-header">
+                <h3>🚚 تفاصيل الشحن</h3>
+                <button class="close-btn" onclick="closeShippingPopup()">×</button>
+            </div>
+            
+            <form class="shipping-form">
+                <div class="form-group">
+                    <label>📱 رقم الهاتف</label>
+                    <input type="tel" id="phone" placeholder="أدخل رقم هاتفك" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>🌍 البلد</label>
+                    <select id="country" required>
+                        <option value="">اختر البلد</option>
+                        <option value="مصر">مصر</option>
+                        <option value="السعودية">السعودية</option>
+                        <option value="الإمارات">الإمارات</option>
+                        <option value="الكويت">الكويت</option>
+                        <option value="قطر">قطر</option>
+                        <option value="البحرين">البحرين</option>
+                        <option value="عمان">عمان</option>
+                        <option value="الأردن">الأردن</option>
+                        <option value="لبنان">لبنان</option>
+                        <option value="المغرب">المغرب</option>
+                        <option value="تونس">تونس</option>
+                        <option value="الجزائر">الجزائر</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>📍 العنوان</label>
+                    <textarea id="address" placeholder="أدخل عنوانك التفصيلي" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>💳 طريقة الدفع</label>
+                    <select id="payment-method" required>
+                        <option value="">اختر طريقة الدفع</option>
+                        <option value="credit-card">بطاقة ائتمان</option>
+                        <option value="cash-on-delivery">الدفع عند الاستلام</option>
+                        <option value="bank-transfer">حوالة بنكية</option>
+                        <option value="mobile-wallet">محفظة إلكترونية</option>
+                    </select>
+                </div>
+                
+                <button type="button" class="confirm-order-btn" onclick="processShippingOrder()">
+                    ✅ تأكيد الطلب
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Share Link Popup -->
+    <div id="shareLinkPopup" class="popup-overlay">
+        <div class="popup-content share-popup">
+            <div class="popup-header">
+                <h3>📱 رابط المشاركة</h3>
+                <button class="close-btn" onclick="closeShareLinkPopup()">×</button>
+            </div>
+            
+            <div class="share-content">
+                <p>تم إنشاء رابط المشاركة بنجاح! شارك هذا الرابط للبدء في البيع:</p>
+                
+                <div class="link-container">
+                    <input type="text" id="shareLink" readonly>
+                    <button onclick="copyShareLink()" class="copy-btn">📋 نسخ</button>
+                </div>
+                
+                <div class="share-buttons">
+                    <button onclick="shareToWhatsApp()" class="share-whatsapp">
+                        💬 واتساب
+                    </button>
+                    <button onclick="shareToFacebook()" class="share-facebook">
+                        📘 فيسبوك
+                    </button>
+                    <button onclick="shareToTwitter()" class="share-twitter">
+                        🐦 تويتر
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        
+        .popup-content {
+            background: white;
+            border-radius: 1rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: popupSlide 0.3s ease-out;
+        }
+        
+        @keyframes popupSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .popup-header h3 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 1.25rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            background: #f3f4f6;
+        }
+        
+        .sell-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .sell-method-card {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sell-method-card:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+        
+        .method-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sell-method-card h4 {
+            margin: 0.5rem 0;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+        
+        .sell-method-card p {
+            color: #6b7280;
+            font-size: 0.8rem;
+            margin: 0.5rem 0;
+        }
+        
+        .method-price {
+            margin-top: 1rem;
+            font-weight: 600;
+            color: #059669;
+        }
+        
+        .method-price small {
+            display: block;
+            color: #6b7280;
+            font-weight: normal;
+            font-size: 0.7rem;
+        }
+        
+        .shipping-form {
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .confirm-order-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .confirm-order-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .share-content {
+            padding: 1.5rem;
+        }
+        
+        .share-content p {
+            margin-bottom: 1rem;
+            color: #6b7280;
+            text-align: center;
+        }
+        
+        .link-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .link-container input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-family: 'Cairo', sans-serif;
+            background: #f9fafb;
+        }
+        
+        .copy-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .copy-btn:hover {
+            background: #2563eb;
+        }
+        
+        .share-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .share-buttons button {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .share-whatsapp {
+            background: #25d366;
+            color: white;
+        }
+        
+        .share-facebook {
+            background: #1877f2;
+            color: white;
+        }
+        
+        .share-twitter {
+            background: #1da1f2;
+            color: white;
+        }
+        
+        .share-buttons button:hover {
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .sell-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .share-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </body>
 </html>

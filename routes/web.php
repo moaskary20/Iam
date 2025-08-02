@@ -40,6 +40,9 @@ Route::get('/progressive-market', [App\Http\Controllers\ProgressiveMarketControl
 Route::get('/progressive-market/{market}', [App\Http\Controllers\ProgressiveMarketController::class, 'showMarket'])->name('progressive.market.show');
 Route::post('/progressive-market/purchase/{product}', [App\Http\Controllers\ProgressiveMarketController::class, 'purchaseProduct'])->name('progressive.purchase');
 
+// Shared Product Route
+Route::get('/share-product/{product}', [App\Http\Controllers\ProgressiveMarketController::class, 'shareProduct'])->name('share.product');
+
 // Keep the old market route for backward compatibility
 Route::get('/market', function () {
     return redirect()->route('progressive.market');
