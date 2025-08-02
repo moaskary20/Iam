@@ -11,4 +11,14 @@ class Slider extends Model
     protected $fillable = [
         'title', 'image', 'link', 'order', 'active'
     ];
+
+    // Always prefix image path with 'sliders/' if not already present
+    public function setImageAttribute($value)
+    {
+        if ($value && !str_starts_with($value, 'sliders/')) {
+            $this->attributes['image'] = 'sliders/' . ltrim($value, '/');
+        } else {
+            $this->attributes['image'] = $value;
+        }
+    }
 }

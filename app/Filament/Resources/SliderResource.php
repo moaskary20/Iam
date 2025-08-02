@@ -26,6 +26,8 @@ class SliderResource extends Resource
                 Forms\Components\TextInput::make('title'),
                 Forms\Components\FileUpload::make('image')
                     ->image()
+                    ->disk('public')
+                    ->directory('sliders')
                     ->required(),
                 Forms\Components\TextInput::make('link'),
                 Forms\Components\TextInput::make('order')
@@ -43,7 +45,8 @@ class SliderResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image'),
+                Tables\Columns\ImageColumn::make('image')
+                    ->disk('public'),
                 Tables\Columns\TextColumn::make('link')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('order')
