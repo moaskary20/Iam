@@ -9,7 +9,9 @@ use App\Http\Controllers\MarketController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    return view('welcome');
+    $user = auth()->user();
+    $sliders = \App\Models\Slider::where('is_active', true)->orderBy('order')->get();
+    return view('welcome', compact('user', 'sliders'));
 });
 
 Route::get('/profile', function () {

@@ -373,6 +373,81 @@
             justify-content: center;
             min-height: 90px;
         }
+
+        /* Enhanced User Info Cards */
+        .user-info-card.enhanced {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08), 0 3px 10px rgba(0,0,0,0.05);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+            max-height: 140px;
+            border: 1px solid rgba(14, 165, 233, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .user-info-card.enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(14, 165, 233, 0.02) 100%);
+            pointer-events: none;
+        }
+
+        .user-info-card.enhanced:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12), 0 8px 25px rgba(14, 165, 233, 0.08);
+            border-color: rgba(14, 165, 233, 0.2);
+        }
+
+        .user-info-card.enhanced:hover::before {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.02) 0%, rgba(14, 165, 233, 0.05) 100%);
+        }
+
+        .info-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.8rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .info-content {
+            flex: 1;
+            text-align: center;
+            width: 100%;
+        }
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--primary-600);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .info-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
         @media (max-width: 900px) {
             .user-info-row {
                 grid-template-columns: repeat(2,1fr);
@@ -491,12 +566,36 @@
         @media (max-width: 768px) {
             .user-info-grid {
                 gap: 15px !important;
+                grid-template-columns: 1fr 1fr !important;
+                grid-template-rows: 1fr 1fr !important;
+                max-width: 100% !important;
+            }
+            
+            .user-info-card.enhanced {
+                padding: 1.2rem 0.8rem;
+                min-height: 120px;
+                max-height: 120px;
+            }
+            
+            .info-icon {
+                font-size: 1.8rem;
+                margin-bottom: 0.6rem;
+            }
+            
+            .info-label {
+                font-size: 0.8rem;
+            }
+            
+            .info-value {
+                font-size: 1rem;
             }
         }
         
         @media (max-width: 480px) {
             .user-info-grid {
                 gap: 10px !important;
+                grid-template-columns: 1fr 1fr !important;
+                padding: 0 5px;
             }
             
             .slider-user-container {
@@ -504,8 +603,31 @@
                 padding: 0 10px !important;
             }
             
-            .user-info-card {
-                padding: 12px !important;
+            .user-info-card.enhanced {
+                padding: 1rem 0.6rem;
+                min-height: 100px;
+                max-height: 100px;
+            }
+            
+            .info-icon {
+                font-size: 1.6rem;
+                margin-bottom: 0.4rem;
+            }
+            
+            .info-content {
+                text-align: center;
+            }
+            
+            .info-label {
+                font-size: 0.75rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .info-value {
+                font-size: 0.9rem;
+                line-height: 1.1;
+            }
+        }
                 font-size: 0.9rem !important;
             }
             
@@ -827,23 +949,69 @@
         </div>
         @endif
 
-        <!-- User Info Cards - 2x2 Grid Below Slider -->
-        <div class="user-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-            <div class="user-info-card">
-                <div style="font-size:1rem;color:var(--primary-600);font-weight:600;margin-bottom:0.3rem;">الاسم</div>
-                <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);">محمد أحمد</div>
+        <!-- User Info Cards - Enhanced 2x2 Grid Design -->
+        <div class="user-info-grid" style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:20px;margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto;">
+            <div class="user-info-card enhanced">
+                <div class="info-icon">👤</div>
+                <div class="info-content">
+                    <div class="info-label">الاسم</div>
+                    <div class="info-value">
+                        @if($user)
+                            {{ $user->first_name . ' ' . $user->last_name }}
+                        @else
+                            ضيف الموقع
+                        @endif
+                    </div>
+                </div>
             </div>
-            <div class="user-info-card">
-                <div style="font-size:1rem;color:var(--primary-600);font-weight:600;margin-bottom:0.3rem;">رصيد الحساب</div>
-                <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);">2500 دولار</div>
+            <div class="user-info-card enhanced">
+                <div class="info-icon">💰</div>
+                <div class="info-content">
+                    <div class="info-label">رصيد الحساب</div>
+                    <div class="info-value">
+                        @if($user)
+                            {{ number_format($user->balance ?? 0, 2) }} دولار
+                        @else
+                            0.00 دولار
+                        @endif
+                    </div>
+                </div>
             </div>
-            <div class="user-info-card">
-                <div style="font-size:1rem;color:var(--primary-600);font-weight:600;margin-bottom:0.3rem;">رقم العضوية</div>
-                <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);">#10234</div>
+            <div class="user-info-card enhanced">
+                <div class="info-icon">🎫</div>
+                <div class="info-content">
+                    <div class="info-label">رقم العضوية</div>
+                    <div class="info-value">
+                        @if($user)
+                            #{{ str_pad($user->id, 5, '0', STR_PAD_LEFT) }}
+                        @else
+                            #غير مسجل
+                        @endif
+                    </div>
+                </div>
             </div>
-            <div class="user-info-card">
-                <div style="font-size:1rem;color:var(--primary-600);font-weight:600;margin-bottom:0.3rem;">السوق الحالي</div>
-                <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);">القاهرة</div>
+            <div class="user-info-card enhanced">
+                <div class="info-icon">🏪</div>
+                <div class="info-content">
+                    <div class="info-label">السوق الحالي</div>
+                    <div class="info-value">
+                        @if($user)
+                            @php
+                                $currentMarketId = $user->current_market_id ?? 1;
+                                $marketNames = [
+                                    1 => 'السوق الأول',
+                                    2 => 'السوق الثاني', 
+                                    3 => 'السوق الثالث',
+                                    4 => 'السوق الرابع',
+                                    5 => 'السوق المفتوح'
+                                ];
+                            @endphp
+                            {{ $marketNames[$currentMarketId] ?? 'غير محدد' }}
+                        @else
+                            غير محدد
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
