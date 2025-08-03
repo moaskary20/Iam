@@ -232,22 +232,31 @@
             justify-content: center;
         }
         
-        .theme-toggle {
+        .auth-toggle {
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            padding: 0.5rem;
-            border-radius: 50%;
+            padding: 0.7rem 1.2rem;
+            border-radius: 25px;
             cursor: pointer;
             transition: all var(--transition-fast);
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
         }
         
-        .theme-toggle:hover {
+        .auth-toggle:hover {
             background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
         
         /* Main Content */
@@ -820,10 +829,18 @@
                 <div class="logo-icon">🚀</div>
                 <span>تطبيق IAM </span>
             </a>
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="تبديل الوضع">
-                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                </svg>
+            <button class="auth-toggle" onclick="handleAuth()" aria-label="تسجيل الدخول/الخروج">
+                @auth
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    <span>تسجيل الخروج</span>
+                @else
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m0 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                    </svg>
+                    <span>تسجيل الدخول</span>
+                @endauth
             </button>
         </div>
     </header>
@@ -1202,26 +1219,30 @@
     <x-mobile-nav />
 
     <script>
-        // Theme Toggle Functionality
-        function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            // Add animation effect
-            body.style.transition = 'all 0.3s ease';
-            setTimeout(() => {
-                body.style.transition = '';
-            }, 300);
-        }
-        
-        // Load saved theme
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.setAttribute('data-theme', savedTheme);
+        // Auth Toggle Functionality
+        function handleAuth() {
+            @auth
+                // User is logged in, redirect to logout
+                if (confirm('هل تريد تسجيل الخروج؟')) {
+                    // Create a form to submit logout request
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route('logout') }}';
+                    
+                    // Add CSRF token
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfToken);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            @else
+                // User is not logged in, redirect to login page
+                window.location.href = '{{ route('login') }}';
+            @endauth
         }
         
         // Alert System
@@ -1572,7 +1593,6 @@
         
         // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            loadTheme();
             setActiveNav();
             initializeMobileNav();
             updateNavBadges();
@@ -1623,12 +1643,6 @@
         
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Toggle theme with Ctrl/Cmd + Shift + T
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
-                e.preventDefault();
-                toggleTheme();
-            }
-            
             // Focus search with Ctrl/Cmd + K
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
