@@ -196,6 +196,11 @@ class User extends Authenticatable implements FilamentUser
         }
     }
 
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
+
     /**
      * Determine if the user can access the given Filament panel.
      */

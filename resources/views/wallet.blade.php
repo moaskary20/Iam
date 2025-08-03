@@ -662,22 +662,12 @@
             
             setTimeout(() => {
                 btn.innerHTML = originalText;
-                alert('الانتقال إلى صفحة الإيداع');
-                // window.location.href = '/deposit';
-            }, 1500);
+                window.location.href = '/deposit';
+            }, 800);
         }
 
         function navigateToWithdraw() {
-            // Add loading animation
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="loading"></span> جاري التحميل...';
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                alert('الانتقال إلى صفحة السحب');
-                // window.location.href = '/withdraw';
-            }, 1500);
+            showWithdrawalPopup();
         }
 
         // Auto-expand first section after page load
@@ -744,10 +734,293 @@
         
         // Initialize
         revealOnScroll();
+        
+        // Withdrawal popup functions
+        function showWithdrawalPopup() {
+            document.getElementById('withdrawalPopup').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeWithdrawalPopup() {
+            document.getElementById('withdrawalPopup').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function processWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdrawal-amount').value);
+            const fullName = document.getElementById('withdrawal-fullname').value;
+            const phone = document.getElementById('withdrawal-phone').value;
+            const paypalEmail = document.getElementById('withdrawal-paypal-email').value;
+
+            // Validation
+            if (!amount || amount < 10) {
+                alert('يرجى إدخال مبلغ صحيح (الحد الأدنى 10 دولار)');
+                return;
+            }
+
+            if (!fullName || fullName.length < 3) {
+                alert('يرجى إدخال الاسم الكامل');
+                return;
+            }
+
+            if (!phone || phone.length < 10) {
+                alert('يرجى إدخال رقم هاتف صحيح');
+                return;
+            }
+
+            if (!paypalEmail || !paypalEmail.includes('@')) {
+                alert('يرجى إدخال إيميل باي بال صحيح');
+                return;
+            }
+
+            const maxBalance = {{ auth()->user()->balance ?? 0 }};
+            if (amount > maxBalance) {
+                alert(`المبلغ يتجاوز رصيدك المتاح ($${maxBalance.toFixed(2)})`);
+                return;
+            }
+
+            // Confirm withdrawal
+            if (!confirm(`هل أنت متأكد من سحب $${amount.toFixed(2)}؟\nسيتم معالجة الطلب خلال 48 ساعة.`)) {
+                return;
+            }
+
+            // Disable button and show loading
+            const btn = document.querySelector('.withdrawal-submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'جاري المعالجة...';
+
+            // Submit withdrawal request
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('full_name', fullName);
+            formData.append('phone', phone);
+            formData.append('paypal_email', paypalEmail);
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            fetch('/withdrawal/request', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeWithdrawalPopup();
+                    location.reload(); // Refresh to show updated balance
+                } else {
+                    alert(data.message || 'حدث خطأ أثناء المعالجة');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ في الاتصال');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = 'تأكيد طلب السحب';
+            });
+        }
     </script>
     <div class="d-block d-md-none">
         <x-mobile-nav />
     </div>
+
+    <!-- Withdrawal Popup -->
+    <div id="withdrawalPopup" class="popup-overlay">
+        <div class="popup-content withdrawal-popup">
+            <div class="popup-header">
+                <h3>💰 سحب الأموال عبر باي بال</h3>
+                <button class="close-btn" onclick="closeWithdrawalPopup()">×</button>
+            </div>
+            
+            <div class="withdrawal-form">
+                <div class="form-group">
+                    <label>💸 المبلغ المراد سحبه (بالدولار)</label>
+                    <input type="number" id="withdrawal-amount" placeholder="0.00" min="10" max="{{ auth()->user()->balance ?? 0 }}" step="0.01" required>
+                    <small>الحد الأدنى: $10 - الحد الأقصى: ${{ number_format(auth()->user()->balance ?? 0, 2) }}</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>👤 الاسم الكامل</label>
+                    <input type="text" id="withdrawal-fullname" placeholder="الاسم كما هو مسجل في باي بال" value="{{ auth()->user()->name ?? '' }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📞 رقم الهاتف</label>
+                    <input type="tel" id="withdrawal-phone" placeholder="+966 50 123 4567" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📧 إيميل باي بال</label>
+                    <input type="email" id="withdrawal-paypal-email" placeholder="your-email@example.com" value="{{ auth()->user()->email ?? '' }}" required>
+                </div>
+                
+                <div class="withdrawal-notice">
+                    <div class="notice-header">⚠️ تنويه مهم</div>
+                    <p>• سيتم معالجة طلب السحب خلال <strong>48 ساعة</strong> من تقديم الطلب</p>
+                    <p>• تأكد من صحة بيانات باي بال المدخلة</p>
+                    <p>• لا يمكن إلغاء الطلب بعد التقديم</p>
+                    <p>• سيتم خصم المبلغ من رصيدك فوراً</p>
+                </div>
+                
+                <button type="button" class="withdrawal-submit-btn" onclick="processWithdrawal()">
+                    تأكيد طلب السحب
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .popup-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .popup-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .withdrawal-form {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group small {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .withdrawal-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .notice-header {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .withdrawal-notice p {
+            margin: 5px 0;
+            color: #856404;
+            font-size: 0.9rem;
+        }
+
+        .withdrawal-submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .withdrawal-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .withdrawal-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            .popup-content {
+                width: 95%;
+                margin: 20px;
+            }
+            
+            .withdrawal-form {
+                padding: 20px;
+            }
+        }
+    </style>
 </body>
 
 </html>

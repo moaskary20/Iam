@@ -8,6 +8,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -45,7 +47,7 @@ Route::get('/wallet', function () {
         'wallet' => $wallet,
         'transactions' => $transactions,
         'deposits' => $wallet->transactions()->where('type', 'deposit')->latest()->take(5)->get(),
-        'withdrawals' => $wallet->transactions()->where('type', 'withdraw')->latest()->take(5)->get(),
+        'withdrawals' => $user->withdrawals()->latest()->take(5)->get(), // استخدام جدول withdrawals بدلاً من transactions
     ]);
 })->middleware(['auth'])->name('wallet');
 
@@ -87,6 +89,19 @@ Route::post('/admin/upload-slider-image', function (Illuminate\Http\Request $req
     
     return response()->json(['error' => 'No file uploaded'], 400);
 })->middleware(['auth'])->name('admin.upload.slider');
+
+// PayPal Routes
+Route::post('/paypal/create-payment', [PayPalController::class, 'createPayment'])->name('paypal.create');
+Route::get('/paypal/success', [PayPalController::class, 'success'])->name('paypal.success');
+Route::get('/paypal/cancel', [PayPalController::class, 'cancel'])->name('paypal.cancel');
+
+// Withdrawal Routes
+Route::post('/withdrawal/request', [WithdrawalController::class, 'store'])->middleware('auth')->name('withdrawal.request');
+
+// Deposit page
+Route::get('/deposit', function () {
+    return view('deposit');
+})->middleware('auth')->name('deposit');
 
 
 

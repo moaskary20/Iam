@@ -838,9 +838,15 @@
             }
             
             closeShippingPopup();
-            processPurchase(currentProductId, 'shipping', {
-                phone, country, address, paymentMethod
-            });
+            
+            // التحقق من طريقة الدفع
+            if (paymentMethod === 'paypal') {
+                processPayPalPayment(currentProductPrice, 'شراء منتج من متجرنا');
+            } else {
+                processPurchase(currentProductId, 'shipping', {
+                    phone, country, address, paymentMethod
+                });
+            }
         }
         
         let currentProductId = null;
@@ -878,6 +884,31 @@
             .catch(error => {
                 console.error('Error:', error);
                 alert('حدث خطأ أثناء المعالجة');
+            });
+        }
+        
+        function processPayPalPayment(amount, description) {
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('description', description);
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
+            fetch('/paypal/create-payment', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // توجيه المستخدم إلى باي بال
+                    window.location.href = data.approval_url;
+                } else {
+                    alert(data.message || 'فشل في إنشاء عملية الدفع عبر باي بال');
+                }
+            })
+            .catch(error => {
+                console.error('PayPal Error:', error);
+                alert('حدث خطأ أثناء التوصيل مع باي بال');
             });
         }
         
@@ -1005,6 +1036,7 @@
                         <option value="cash-on-delivery">الدفع عند الاستلام</option>
                         <option value="bank-transfer">حوالة بنكية</option>
                         <option value="mobile-wallet">محفظة إلكترونية</option>
+                        <option value="paypal">باي بال (PayPal)</option>
                     </select>
                 </div>
                 
