@@ -16,5 +16,6 @@ class VerifyCsrfToken extends Middleware
         'livewire/upload-file',
         'livewire/preview-file/*',
         'admin/upload-slider-image',
+        'api/*',
     ];
 }

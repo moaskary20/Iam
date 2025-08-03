@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # Handle OPTIONS requests for CORS (Livewire fix)
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=200,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -12,6 +16,10 @@
     # Handle X-XSRF-Token Header
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Special handling for Livewire upload routes
+    RewriteCond %{REQUEST_URI} ^/livewire/upload-file
+    RewriteRule ^(.*)$ index.php [QSA,L]
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -22,4 +30,18 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# Security headers for file uploads
+<IfModule mod_headers.c>
+    # CORS headers for Livewire
+    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN"
+    
+    # Handle preflight OPTIONS requests
+    <If "%{REQUEST_METHOD} == 'OPTIONS'">
+        Header always set Access-Control-Max-Age "3600"
+        Header always set Content-Type "application/json"
+        Header always set Content-Length "0"
+    </If>
 </IfModule>

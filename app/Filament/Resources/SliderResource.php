@@ -28,6 +28,13 @@ class SliderResource extends Resource
                     ->image()
                     ->disk('public')
                     ->directory('sliders')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+                    ->maxSize(50 * 1024) // 50MB
+                    ->imageResizeMode('cover')
+                    ->imageCropAspectRatio('16:9')
+                    ->imageResizeTargetWidth('1920')
+                    ->imageResizeTargetHeight('1080')
+                    ->uploadingMessage('جاري رفع الصورة...')
                     ->required(),
                 Forms\Components\TextInput::make('link'),
                 Forms\Components\TextInput::make('order')
