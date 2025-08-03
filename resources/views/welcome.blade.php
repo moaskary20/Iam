@@ -311,54 +311,6 @@
             height: 1.5rem;
         }
         
-        /* Mobile Navigation */
-        .mobile-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100vw;
-            background: var(--bg-primary);
-            border-top: 1px solid var(--border-color);
-            padding: 0.5rem 0;
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-        
-        .mobile-nav-list {
-            display: flex;
-            justify-content: space-around;
-            list-style: none;
-        }
-        
-        .mobile-nav-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.5rem;
-            text-decoration: none;
-            color: var(--text-tertiary);
-            transition: all var(--transition-fast);
-            border-radius: 0.5rem;
-            min-width: 4rem;
-        }
-        
-        .mobile-nav-link:hover, .mobile-nav-link.active {
-            color: var(--primary-600);
-            background: var(--primary-50);
-            transform: scale(1.05);
-        }
-        
-        .mobile-nav-icon {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
-        
-        .mobile-nav-text {
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        
         /* User Info Row */
         .user-info-row {
             max-width: 100%;
@@ -1220,24 +1172,24 @@
                 <div class="content-card fade-in" style="animation-delay: 0.2s; background: rgba(255,255,255,0.95); box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: none;">
                     <h3 class="card-title">إدارة المنتجات</h3>
                     <p class="card-description">أضف وحرر منتجاتك بسهولة مع واجهة بسيطة وسريعة</p>
-                    <button class="card-button" onclick="showAlert('error', 'عذراً، هذه الميزة غير متاحة حالياً')">
+                    <a href="{{ route('progressive.market') }}" class="card-button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
                         إدارة المنتجات
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
                         </svg>
-                    </button>
+                    </a>
                 </div>
 
                 <div class="content-card fade-in" style="animation-delay: 0.3s; background: rgba(255,255,255,0.95); box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: none;">
                     <h3 class="card-title">الإعدادات</h3>
                     <p class="card-description">خصص تجربتك حسب احتياجاتك الشخصية</p>
-                    <button class="card-button">
+                    <a href="{{ route('profile') }}" class="card-button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
                         الذهاب للإعدادات
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -1320,6 +1272,129 @@
                     alert.remove();
                 }, 300);
             }
+        }
+        
+        // Enhanced Mobile Navigation
+        function initializeMobileNav() {
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            const currentPath = window.location.pathname;
+            
+            mobileNavLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                
+                // Set active state
+                if (href === currentPath || (currentPath === '/' && href === '/')) {
+                    link.classList.add('active');
+                }
+                
+                // Add ripple effect on click
+                link.addEventListener('click', function(e) {
+                    createRippleEffect(e, this);
+                    
+                    // Add haptic feedback for mobile devices
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                    
+                    // Smooth transition animation
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+                
+                // Add touch feedback
+                link.addEventListener('touchstart', function() {
+                    this.style.background = 'rgba(14, 165, 233, 0.1)';
+                });
+                
+                link.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.background = '';
+                    }, 200);
+                });
+            });
+        }
+        
+        function createRippleEffect(event, element) {
+            const ripple = element.querySelector('.mobile-nav-ripple');
+            if (!ripple) return;
+            
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.opacity = '1';
+            ripple.style.transform = 'translate(-50%, -50%) scale(1)';
+            
+            setTimeout(() => {
+                ripple.style.opacity = '0';
+                ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+            }, 600);
+        }
+        
+        // Mobile navigation badge system
+        function updateNavBadges() {
+            const badges = {
+                wallet: 0, // Could be unread transactions
+                statistics: 0, // Could be new insights
+                market: 0, // Could be new products
+                profile: 0 // Could be incomplete profile sections
+            };
+            
+            // Example: Show badge on wallet if there are recent transactions
+            if (badges.wallet > 0) {
+                showNavBadge('wallet', badges.wallet);
+            }
+        }
+        
+        function showNavBadge(navItem, count) {
+            const link = document.querySelector(`[data-nav="${navItem}"]`);
+            if (link) {
+                const indicator = link.querySelector('.mobile-nav-indicator');
+                if (indicator) {
+                    indicator.style.opacity = '1';
+                    indicator.style.transform = 'scale(1)';
+                    if (count > 1) {
+                        indicator.setAttribute('data-count', count);
+                    }
+                }
+            }
+        }
+        
+        // Performance optimization for mobile nav
+        function optimizeMobileNav() {
+            const nav = document.querySelector('.mobile-nav');
+            if (!nav) return;
+            
+            // Use transform3d for better performance
+            nav.style.transform = 'translate3d(0, 0, 0)';
+            
+            // Optimize scroll performance
+            let scrollTimeout;
+            let lastScrollY = window.scrollY;
+            
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                
+                // Hide nav when scrolling down, show when scrolling up
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    nav.style.transform = 'translate3d(0, 100%, 0)';
+                } else {
+                    nav.style.transform = 'translate3d(0, 0, 0)';
+                }
+                
+                lastScrollY = currentScrollY;
+                
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    nav.style.transform = 'translate3d(0, 0, 0)';
+                }, 1000);
+            }, { passive: true });
         }
         
         // Navigation Active State
@@ -1499,6 +1574,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             setActiveNav();
+            initializeMobileNav();
+            updateNavBadges();
+            optimizeMobileNav();
             
             // Add some demo data
             setTimeout(() => {

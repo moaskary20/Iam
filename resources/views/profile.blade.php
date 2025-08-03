@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الملف الشخصي</title>
     <style>
-        nav.mobile-nav {
-    background-color: white;
-}
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
         
         * {
@@ -22,7 +19,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
-            padding-bottom: 80px; /* مسافة أسفل الصفحة للمنيو السفلي */
+            padding-bottom: 100px; /* مسافة أسفل الصفحة للمنيو السفلي */
         }
 
         /* Simple Background Animation */
@@ -336,57 +333,6 @@
         .info-card:nth-child(2) { animation-delay: 0.2s; }
         .info-card:nth-child(3) { animation-delay: 0.4s; }
 
-        /* Additional styles for the profile page */
-               /* Mobile Navigation */
-        .mobile-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100vw;
-            background: var(--bg-primary);
-            border-top: 1px solid var(--border-color);
-            padding: 0.5rem 0;
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-        
-        .mobile-nav-list {
-            display: flex;
-            justify-content: space-around;
-            list-style: none;
-        }
-        
-        .mobile-nav-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.5rem;
-            text-decoration: none;
-            color: var(--text-tertiary);
-            transition: all var(--transition-fast);
-            border-radius: 0.5rem;
-            min-width: 4rem;
-        }
-        
-        .mobile-nav-link:hover, .mobile-nav-link.active {
-            color: var(--primary-600);
-            background: var(--primary-50);
-            transform: scale(1.05);
-        }
-        
-        .mobile-nav-icon {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
-        
-        .mobile-nav-text {
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-    </style>
-    <style>
         /* Hide mobile nav on desktop */
         @media (min-width: 768px) {
             .d-block.d-md-none {
@@ -567,11 +513,8 @@
             document.body.removeChild(textArea);
         }
     </script>
-    </script>
     <div class="d-block d-md-none">
         <x-mobile-nav />
     </div>
 </body>
-
-
 </html>

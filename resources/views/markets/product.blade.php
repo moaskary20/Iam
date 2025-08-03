@@ -468,5 +468,10 @@
             thumbnail.classList.add('active');
         }
     </script>
+    
+    <!-- Mobile Navigation -->
+    <div class="d-block d-md-none">
+        <x-mobile-nav />
+    </div>
 </body>
 </html>

@@ -525,5 +525,10 @@
             </div>
         </div>
     </div>
+    
+    <!-- Mobile Navigation -->
+    <div class="d-block d-md-none">
+        <x-mobile-nav />
+    </div>
 </body>
 </html>

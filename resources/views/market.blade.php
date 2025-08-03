@@ -524,56 +524,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-                        /* Additional styles for the profile page */
-               /* Mobile Navigation */
-        .mobile-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100vw;
-            background: var(--bg-primary);
-            border-top: 1px solid var(--border-color);
-            padding: 0.5rem 0;
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-        
-        .mobile-nav-list {
-            display: flex;
-            justify-content: space-around;
-            list-style: none;
-        }
-        
-        .mobile-nav-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.5rem;
-            text-decoration: none;
-            color: var(--text-tertiary);
-            transition: all var(--transition-fast);
-            border-radius: 0.5rem;
-            min-width: 4rem;
-        }
-        
-        .mobile-nav-link:hover, .mobile-nav-link.active {
-            color: var(--primary-600);
-            background: var(--primary-50);
-            transform: scale(1.05);
-        }
-        
-        .mobile-nav-icon {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
-        
-        .mobile-nav-text {
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-                        nav.mobile-nav {
-    background-color: white;}
     </style>
 </head>
 <body>

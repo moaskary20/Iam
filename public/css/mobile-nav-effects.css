@@ -1,0 +1,235 @@
+/* Additional Professional Effects for Mobile Navigation */
+
+/* Glassmorphism Effect */
+.mobile-nav-background {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Enhanced Gradient Border */
+.mobile-nav-border {
+    background: linear-gradient(90deg, 
+        #667eea 0%, 
+        #764ba2 25%, 
+        #f093fb 50%, 
+        #f5576c 75%, 
+        #4facfe 100%);
+    height: 5px;
+    border-radius: 0 0 12px 12px;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Advanced Ripple Effect */
+.mobile-nav-link::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    transition: all 0.6s ease;
+    z-index: -1;
+}
+
+.mobile-nav-link:active::before {
+    width: 100px;
+    height: 100px;
+}
+
+/* Floating Animation for Primary Button */
+.mobile-nav-primary {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: scale(1.1) translateY(-8px); }
+    50% { transform: scale(1.1) translateY(-12px); }
+}
+
+/* Magnetic Effect */
+.mobile-nav-link {
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.mobile-nav-link:hover:not(.mobile-nav-primary) {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+}
+
+/* Icon Rotation on Hover */
+.mobile-nav-link:hover .mobile-nav-icon {
+    transform: rotate(5deg) scale(1.1);
+}
+
+.mobile-nav-primary:hover .mobile-nav-icon {
+    transform: rotate(-5deg) scale(1.1);
+}
+
+/* Text Glow Effect */
+.mobile-nav-link:hover .mobile-nav-text {
+    text-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
+}
+
+.mobile-nav-primary .mobile-nav-text {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Notification Pulse */
+.mobile-nav-indicator.pulse {
+    animation: indicatorPulse 2s ease-in-out infinite;
+}
+
+@keyframes indicatorPulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+}
+
+/* Loading Spinner */
+.mobile-nav-link.loading .mobile-nav-icon {
+    animation: spin 1s linear infinite;
+}
+
+.mobile-nav-link.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(102, 126, 234, 0.3);
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: spin 1s linear infinite;
+}
+
+/* Success Feedback */
+.mobile-nav-link.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.mobile-nav-link.success .mobile-nav-icon {
+    filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.5));
+}
+
+/* Error Feedback */
+.mobile-nav-link.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.mobile-nav-link.error .mobile-nav-icon {
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+/* Progressive Enhancement */
+@supports (backdrop-filter: blur(20px)) {
+    .mobile-nav-background {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(30px);
+    }
+}
+
+/* 3D Transform Effects */
+.mobile-nav-link {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.mobile-nav-link:hover {
+    transform: translateY(-2px) rotateX(5deg);
+}
+
+.mobile-nav-primary:hover {
+    transform: scale(1.1) translateY(-8px) rotateX(-5deg);
+}
+
+/* Advanced Shadow Effects */
+.mobile-nav {
+    filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.15));
+}
+
+.mobile-nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: #667eea;
+    border-radius: 50%;
+    box-shadow: 0 0 12px #667eea;
+}
+
+/* Micro Interactions */
+.mobile-nav-icon-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.mobile-nav-icon-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: rotate(45deg) translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.mobile-nav-link:hover .mobile-nav-icon-container::before {
+    transform: rotate(45deg) translateX(100%);
+}
+
+/* Accessibility Improvements */
+.mobile-nav-link:focus-visible {
+    outline: 3px solid #667eea;
+    outline-offset: 3px;
+    border-radius: 20px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .mobile-nav-background {
+        background: white;
+        border-top: 3px solid black;
+    }
+    
+    .mobile-nav-link {
+        color: black;
+        border: 2px solid black;
+    }
+    
+    .mobile-nav-link.active {
+        background: black;
+        color: white;
+    }
+}

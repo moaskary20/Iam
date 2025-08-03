@@ -1,0 +1,82 @@
+/* Global Mobile Navigation Layout */
+
+/* Ensure consistent spacing for all pages */
+body {
+    padding-bottom: 100px !important; /* Reserve space for mobile nav */
+}
+
+@media (min-width: 768px) {
+    body {
+        padding-bottom: 0 !important; /* Remove on desktop */
+    }
+}
+
+/* Hide mobile nav on desktop screens */
+@media (min-width: 768px) {
+    .d-block.d-md-none {
+        display: none !important;
+    }
+}
+
+/* Show mobile nav only on mobile */
+@media (max-width: 767px) {
+    .d-none.d-md-block {
+        display: none !important;
+    }
+}
+
+/* Ensure mobile nav is always visible on mobile */
+.mobile-nav {
+    display: block !important;
+    visibility: visible !important;
+}
+
+@media (min-width: 768px) {
+    .mobile-nav {
+        display: none !important;
+        visibility: hidden !important;
+    }
+}
+
+/* Additional spacing adjustments for specific content */
+.container,
+.main-content,
+main {
+    margin-bottom: 2rem;
+}
+
+/* Prevent content from being hidden behind mobile nav */
+.content-wrapper {
+    min-height: calc(100vh - 120px);
+}
+
+/* Active state highlighting for current page */
+.mobile-nav-link[href="/"] {
+    --mobile-nav-active: data-page="home";
+}
+
+.mobile-nav-link[href*="wallet"] {
+    --mobile-nav-active: data-page="wallet";
+}
+
+.mobile-nav-link[href*="market"] {
+    --mobile-nav-active: data-page="market";
+}
+
+.mobile-nav-link[href*="statistics"] {
+    --mobile-nav-active: data-page="statistics";
+}
+
+.mobile-nav-link[href*="profile"] {
+    --mobile-nav-active: data-page="profile";
+}
+
+/* Performance optimizations */
+.mobile-nav-link,
+.mobile-nav-icon,
+.mobile-nav-ripple {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
