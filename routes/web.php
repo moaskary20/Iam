@@ -88,4 +88,51 @@ Route::post('/admin/upload-slider-image', function (Illuminate\Http\Request $req
     return response()->json(['error' => 'No file uploaded'], 400);
 })->middleware(['auth'])->name('admin.upload.slider');
 
+// إصلاح مسارات Livewire لدعم GET و POST
+Route::match(['GET', 'POST'], '/livewire/upload-file', function (Illuminate\Http\Request $request) {
+    if ($request->isMethod('GET')) {
+        return response()->json([
+            'message' => 'Upload endpoint ready',
+            'method' => 'POST',
+            'csrf_token' => csrf_token(),
+            'status' => 'ready'
+        ], 200);
+    }
+    
+    // للطلبات POST، نسمح للـ request بالمرور للمعالج الافتراضي
+    // لكن نحتاج للتعامل مع رفع الملفات هنا
+    if ($request->hasFile('file')) {
+        $file = $request->file('file');
+        
+        // التحقق من صحة الملف
+        if ($file && $file->isValid()) {
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('livewire-tmp', $filename, 'public');
+            
+            return response()->json([
+                'success' => true,
+                'filename' => $filename,
+                'path' => $path,
+                'url' => asset('storage/' . $path)
+            ], 200);
+        }
+    }
+    
+    return response()->json(['error' => 'Invalid file upload'], 400);
+})->middleware(['web'])->name('livewire.upload-file.custom');
+
+Route::match(['GET', 'POST'], '/livewire/preview-file/{filename}', function ($filename, Illuminate\Http\Request $request) {
+    if ($request->isMethod('GET')) {
+        $path = storage_path('app/public/livewire-tmp/' . $filename);
+        
+        if (file_exists($path)) {
+            return response()->file($path);
+        }
+        
+        return response()->json(['error' => 'File not found'], 404);
+    }
+    
+    return response()->json(['preview' => asset('storage/livewire-tmp/' . $filename)]);
+})->middleware(['web'])->name('livewire.preview-file.custom');
+
 
