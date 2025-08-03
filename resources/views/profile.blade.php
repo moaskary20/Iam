@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الملف الشخصي</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         nav.mobile-nav {
     background-color: white;
@@ -26,7 +25,7 @@
             padding-bottom: 80px; /* مسافة أسفل الصفحة للمنيو السفلي */
         }
 
-        /* Background Animation */
+        /* Simple Background Animation */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -34,47 +33,9 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 0.1;
-        }
-
-        .floating-shapes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .shape {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .shape:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .shape:nth-child(2) {
-            width: 120px;
-            height: 120px;
-            left: 70%;
-            animation-delay: 2s;
-        }
-
-        .shape:nth-child(3) {
-            width: 60px;
-            height: 60px;
-            left: 40%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+            opacity: 0.05;
+            background: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%);
         }
 
         .container {
@@ -585,74 +546,27 @@
                     }, 1000);
                 });
             }
-
-            // Add floating animation to referral card
-            const referralCard = document.querySelector('.referral-card');
-            if (referralCard) {
-                setInterval(() => {
-                    referralCard.style.transform = 'translateY(-5px)';
-                    setTimeout(() => {
-                        referralCard.style.transform = 'translateY(0)';
-                    }, 500);
-                }, 3000);
-            }
         });
 
-        // Create particle effect
-        function createParticles() {
-            const canvas = document.createElement('canvas');
-            canvas.style.position = 'fixed';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            canvas.style.pointerEvents = 'none';
-            canvas.style.zIndex = '-1';
-            canvas.style.opacity = '0.3';
-            document.body.appendChild(canvas);
-
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            const particles = [];
-            const particleCount = 50;
-
-            for (let i = 0; i < particleCount; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 2,
-                    vy: (Math.random() - 0.5) * 2,
-                    size: Math.random() * 3 + 1,
-                    opacity: Math.random() * 0.5 + 0.2
-                });
-            }
-
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                particles.forEach(particle => {
-                    particle.x += particle.vx;
-                    particle.y += particle.vy;
-                    
-                    if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
-                    if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
-                    
-                    ctx.beginPath();
-                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`;
-                    ctx.fill();
-                });
-                
-                requestAnimationFrame(animate);
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('فشل في نسخ النص: ', err);
             }
             
-            animate();
+            document.body.removeChild(textArea);
         }
-
-        // Initialize particles after page load
-        window.addEventListener('load', createParticles);
+    </script>
     </script>
     <div class="d-block d-md-none">
         <x-mobile-nav />

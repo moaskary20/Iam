@@ -1105,84 +1105,133 @@
 
         <!-- User Info Cards - Enhanced 2x2 Grid Design -->
         <div class="user-info-grid" style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:20px;margin-bottom:2rem;max-width:100%;margin-left:0;margin-right:0;padding:0;">
-            @if($user)
-                <!-- User Personal Statistics -->
-                <div class="user-info-card enhanced">
-                    <div class="info-icon">💰</div>
-                    <div class="info-content">
-                        <div class="info-label">رصيدك الحالي</div>
-                        <div class="info-value" data-stat="user_balance">
-                            ${{ number_format($statistics['user_balance'], 2) }}
-                        </div>
+            <div class="user-info-card enhanced">
+                <div class="info-icon">�</div>
+                <div class="info-content">
+                    <div class="info-label">إجمالي المستخدمين</div>
+                    <div class="info-value" data-stat="total_users">
+                        {{ number_format($statistics['total_users']) }} مستخدم
                     </div>
                 </div>
-                <div class="user-info-card enhanced">
-                    <div class="info-icon">🔄</div>
-                    <div class="info-content">
-                        <div class="info-label">معاملاتك</div>
-                        <div class="info-value" data-stat="user_transactions">
-                            {{ number_format($statistics['user_transactions']) }} معاملة
-                        </div>
+            </div>
+            <div class="user-info-card enhanced">
+                <div class="info-icon">💰</div>
+                <div class="info-content">
+                    <div class="info-label">إجمالي الأرصدة</div>
+                    <div class="info-value" data-stat="total_balance">
+                        ${{ number_format($statistics['total_balance'], 2) }}
                     </div>
                 </div>
-                <div class="user-info-card enhanced">
-                    <div class="info-icon">📈</div>
-                    <div class="info-content">
-                        <div class="info-label">إجمالي إيداعاتك</div>
-                        <div class="info-value" data-stat="total_deposits">
-                            ${{ number_format($statistics['total_deposits'], 2) }}
-                        </div>
+            </div>
+            <div class="user-info-card enhanced">
+                <div class="info-icon">🔄</div>
+                <div class="info-content">
+                    <div class="info-label">إجمالي المعاملات</div>
+                    <div class="info-value" data-stat="total_transactions">
+                        {{ number_format($statistics['total_transactions']) }} معاملة
                     </div>
                 </div>
-                <div class="user-info-card enhanced">
-                    <div class="info-icon">📉</div>
-                    <div class="info-content">
-                        <div class="info-label">إجمالي سحوباتك</div>
-                        <div class="info-value" data-stat="total_withdrawals">
-                            ${{ number_format($statistics['total_withdrawals'], 2) }}
-                        </div>
+            </div>
+            <div class="user-info-card enhanced">
+                <div class="info-icon">📈</div>
+                <div class="info-content">
+                    <div class="info-label">المستخدمون النشطون</div>
+                    <div class="info-value" data-stat="active_users">
+                        {{ number_format($statistics['active_users']) }} نشط
                     </div>
                 </div>
-            @else
-                <!-- Guest/System Statistics -->
-                <div class="user-info-card enhanced">
-                    <div class="info-icon">👥</div>
-                    <div class="info-content">
-                        <div class="info-label">إجمالي المستخدمين</div>
-                        <div class="info-value" data-stat="total_users">
-                            {{ number_format($statistics['total_users']) }} مستخدم
-                        </div>
-                    </div>
-                </div>
-                <div class="user-info-card enhanced">
-                    <div class="info-icon">💰</div>
-                    <div class="info-content">
-                        <div class="info-label">إجمالي الأرصدة</div>
-                        <div class="info-value" data-stat="total_balance">
-                            ${{ number_format($statistics['total_balance'], 2) }}
-                        </div>
-                    </div>
-                </div>
-                <div class="user-info-card enhanced">
-                    <div class="info-icon">🔄</div>
-                    <div class="info-content">
-                        <div class="info-label">إجمالي المعاملات</div>
-                        <div class="info-value" data-stat="total_transactions">
-                            {{ number_format($statistics['total_transactions']) }} معاملة
-                        </div>
-                    </div>
-                </div>
-                <div class="user-info-card enhanced">
-                    <div class="info-icon">📈</div>
-                    <div class="info-content">
-                        <div class="info-label">المستخدمون النشطون</div>
-                        <div class="info-value" data-stat="active_users">
-                            {{ number_format($statistics['active_users']) }} نشط
-                        </div>
-                    </div>
-                </div>
-            @endif
+            </div>
         </div>
+        
+        @if($user)
+        <!-- User Personal Info Section -->
+        <div class="user-personal-info" style="background: linear-gradient(135deg, rgba(14,165,233,0.1) 0%, rgba(79,70,229,0.1) 100%); border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(14,165,233,0.2);">
+            <h3 style="margin: 0 0 1rem 0; color: var(--primary-600); font-weight: 600; text-align: center;">معلوماتك الشخصية</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">👤</div>
+                    <div style="font-size: 0.9rem; color: var(--primary-600); font-weight: 600;">الاسم</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">{{ $user->first_name . ' ' . $user->last_name }}</div>
+                </div>
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">💳</div>
+                    <div style="font-size: 0.9rem; color: var(--primary-600); font-weight: 600;">رصيدك</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${{ number_format($user->balance ?? 0, 2) }}</div>
+                </div>
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎫</div>
+                    <div style="font-size: 0.9rem; color: var(--primary-600); font-weight: 600;">رقم العضوية</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">#{{ str_pad($user->id, 5, '0', STR_PAD_LEFT) }}</div>
+                </div>
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🏪</div>
+                    <div style="font-size: 0.9rem; color: var(--primary-600); font-weight: 600;">السوق الحالي</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">
+                        @php
+                            $currentMarketId = $user->current_market_id ?? 1;
+                            $marketNames = [
+                                1 => 'السوق الأول',
+                                2 => 'السوق الثاني', 
+                                3 => 'السوق الثالث',
+                                4 => 'السوق الرابع',
+                                5 => 'السوق المفتوح'
+                            ];
+                        @endphp
+                        {{ $marketNames[$currentMarketId] ?? 'غير محدد' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        
+        <!-- Additional Statistics Section -->
+        <div class="additional-stats" style="background: linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(168,85,247,0.1) 100%); border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(34,197,94,0.2); position: relative;">
+            <!-- Live Update Indicator -->
+            <div id="updateIndicator" style="position: absolute; top: 1rem; left: 1rem; background: var(--success-500); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; opacity: 0; transition: all 0.3s ease;">
+                🔄 تحديث مباشر
+            </div>
+            
+            <h3 style="margin: 0 0 1.5rem 0; color: var(--success-600); font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                إحصائيات إضافية 
+                <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 400;">(يتم التحديث كل 30 ثانية)</span>
+                <button onclick="manualRefresh()" style="background: var(--success-500); color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.background='var(--success-600)'" onmouseout="this.style.background='var(--success-500)'">
+                    🔄 تحديث
+                </button>
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">💵</div>
+                    <div style="font-size: 0.9rem; color: var(--success-600); font-weight: 600;">متوسط الرصيد</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);" data-stat="average_balance">${{ number_format($statistics['average_balance'], 2) }}</div>
+                </div>
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
+                    <div style="font-size: 0.9rem; color: var(--success-600); font-weight: 600;">إجمالي الإيرادات</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);" data-stat="total_revenue">${{ number_format($statistics['total_revenue'], 2) }}</div>
+                </div>
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🆕</div>
+                    <div style="font-size: 0.9rem; color: var(--success-600); font-weight: 600;">مستخدمون جدد اليوم</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);" data-stat="today_users">{{ number_format($statistics['today_users']) }}</div>
+                </div>
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📅</div>
+                    <div style="font-size: 0.9rem; color: var(--success-600); font-weight: 600;">معاملات هذا الشهر</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);" data-stat="monthly_transactions">{{ number_format($statistics['monthly_transactions']) }}</div>
+                </div>
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">✅</div>
+                    <div style="font-size: 0.9rem; color: var(--success-600); font-weight: 600;">المعاملات الناجحة</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);" data-stat="successful_transactions">{{ number_format($statistics['successful_transactions']) }}</div>
+                </div>
+                <div style="text-align: center; background: rgba(255,255,255,0.7); padding: 1rem; border-radius: 1rem;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⏳</div>
+                    <div style="font-size: 0.9rem; color: var(--success-600); font-weight: 600;">معاملات معلقة</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);" data-stat="pending_transactions">{{ number_format($statistics['pending_transactions']) }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Separator -->
     <div style="height: 40px;"></div>
@@ -1421,22 +1470,13 @@
             fetch('{{ route("api.statistics") }}')
                 .then(response => response.json())
                 .then(statistics => {
-                    // Check if user is authenticated to update appropriate statistics
-                    @if($user)
-                        // Update user personal statistics
-                        updateStatValue('user_balance', '$' + numberFormat(statistics.user_balance, 2));
-                        updateStatValue('user_transactions', statistics.user_transactions + ' معاملة');
-                        updateStatValue('total_deposits', '$' + numberFormat(statistics.total_deposits, 2));
-                        updateStatValue('total_withdrawals', '$' + numberFormat(statistics.total_withdrawals, 2));
-                    @else
-                        // Update system statistics for guests
-                        updateStatValue('total_users', statistics.total_users + ' مستخدم');
-                        updateStatValue('total_balance', '$' + numberFormat(statistics.total_balance, 2));
-                        updateStatValue('total_transactions', statistics.total_transactions + ' معاملة');
-                        updateStatValue('active_users', statistics.active_users + ' نشط');
-                    @endif
+                    // Update main statistics
+                    updateStatValue('total_users', statistics.total_users + ' مستخدم');
+                    updateStatValue('total_balance', '$' + numberFormat(statistics.total_balance, 2));
+                    updateStatValue('total_transactions', statistics.total_transactions + ' معاملة');
+                    updateStatValue('active_users', statistics.active_users + ' نشط');
                     
-                    // Update additional statistics (common for both user types)
+                    // Update additional statistics
                     updateStatValue('average_balance', '$' + numberFormat(statistics.average_balance, 2));
                     updateStatValue('total_revenue', '$' + numberFormat(statistics.total_revenue, 2));
                     updateStatValue('today_users', numberFormat(statistics.today_users));

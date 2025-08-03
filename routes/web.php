@@ -6,21 +6,26 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MarketController;
+use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Auth;
 
-Route::get('/', function () {
-    $user = auth()->user();
-    $sliders = \App\Models\Slider::where('is_active', true)->orderBy('order')->get();
-    return view('welcome', compact('user', 'sliders'));
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/api/statistics', [HomeController::class, 'getStatistics'])->name('api.statistics');
 
 Route::get('/profile', function () {
     $user = Auth::user();
+    if (!$user) {
+        return redirect()->route('login');
+    }
     return view('profile', compact('user'));
-})->middleware(['auth', 'verified'])->name('profile');
+})->middleware(['auth'])->name('profile');
 
 Route::get('/profile/edit', [ProfileController::class, 'edit'])->middleware('auth')->name('profile.edit');
 Route::post('/profile/update', [ProfileController::class, 'update'])->middleware('auth')->name('profile.update');
+
+// Statistics Route
+Route::get('/statistics', [StatisticsController::class, 'index'])->middleware('auth')->name('statistics');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -30,6 +35,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/wallet', function () {
     $user = auth()->user();
+    if (!$user) {
+        return redirect()->route('login');
+    }
     $wallet = $user->wallet ?? $user->wallet()->create(['balance' => $user->balance ?? 0]);
     $transactions = $wallet->transactions()->latest()->take(10)->get();
     
@@ -39,7 +47,7 @@ Route::get('/wallet', function () {
         'deposits' => $wallet->transactions()->where('type', 'deposit')->latest()->take(5)->get(),
         'withdrawals' => $wallet->transactions()->where('type', 'withdraw')->latest()->take(5)->get(),
     ]);
-})->middleware(['auth', 'verified'])->name('wallet');
+})->middleware(['auth'])->name('wallet');
 
 // Market Routes
 Route::get('/markets', [MarketController::class, 'index'])->name('markets.index');
