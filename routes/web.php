@@ -89,3 +89,4 @@ Route::post('/admin/upload-slider-image', function (Illuminate\Http\Request $req
 })->middleware(['auth'])->name('admin.upload.slider');
 
 
+

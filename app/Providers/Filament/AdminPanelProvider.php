@@ -44,14 +44,12 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
             ])
             ->middleware([
-                \App\Http\Middleware\LivewireFixMiddleware::class,
+                \App\Http\Middleware\FixLivewireUploads::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
                 \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
                 \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-                \App\Http\Middleware\HandleFileUploads::class,
-                \App\Http\Middleware\FilamentCsrfFix::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
