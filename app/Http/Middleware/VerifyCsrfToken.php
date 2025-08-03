@@ -12,6 +12,9 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        // Default: no URIs excluded from CSRF verification
+        'livewire/*',
+        'livewire/upload-file',
+        'livewire/preview-file/*',
+        'admin/upload-slider-image',
     ];
 }
