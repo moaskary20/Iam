@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>تطبيق IAM</title>
+    <!-- Updated version with local server layout -->
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
