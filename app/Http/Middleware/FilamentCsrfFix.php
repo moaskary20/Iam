@@ -28,6 +28,22 @@ class FilamentCsrfFix
             }
         }
         
+        // السماح برفع الملفات في لوحة الإدارة
+        if ($request->is('admin/*')) {
+            // تجديد CSRF token للطلبات المتعلقة بالملفات
+            if ($request->hasFile('attachment') || $request->hasFile('image') || $request->hasFile('file')) {
+                $request->session()->regenerateToken();
+            }
+            
+            // إعداد headers للسيرفر
+            $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+            
+            // إضافة CSRF token إلى الـ headers إذا لم يكن موجوداً
+            if (!$request->header('X-CSRF-TOKEN')) {
+                $request->headers->set('X-CSRF-TOKEN', csrf_token());
+            }
+        }
+        
         return $next($request);
     }
 }

@@ -1,0 +1,29 @@
+<IfModule mod_php.c>
+    # إعدادات رفع الملفات
+    php_value upload_max_filesize 50M
+    php_value post_max_size 50M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_value memory_limit 256M
+    
+    # إعدادات Session
+    php_value session.gc_maxlifetime 7200
+    php_value session.cookie_lifetime 7200
+    
+    # إعدادات الأمان
+    php_value allow_url_fopen On
+    php_value max_input_vars 3000
+</IfModule>
+
+# إعدادات الأمان العامة
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# إعدادات CORS للملفات المرفوعة
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN"
+</IfModule>

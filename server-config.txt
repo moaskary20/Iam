@@ -1,0 +1,16 @@
+# إعدادات PHP للسيرفر - يتم وضعها في .htaccess أو php.ini
+
+# رفع الملفات
+php_value upload_max_filesize 50M
+php_value post_max_size 50M
+php_value max_execution_time 300
+php_value max_input_time 300
+php_value memory_limit 256M
+
+# إعدادات Session
+php_value session.gc_maxlifetime 7200
+php_value session.cookie_lifetime 7200
+
+# إعدادات الأمان
+php_value allow_url_fopen On
+php_value max_input_vars 3000

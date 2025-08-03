@@ -67,4 +67,25 @@ Route::get('/market', function () {
     return redirect()->route('progressive.market');
 })->middleware(['auth', 'verified'])->name('market');
 
+// Admin upload route for slider images
+Route::post('/admin/upload-slider-image', function (Illuminate\Http\Request $request) {
+    if (!auth()->check()) {
+        return response()->json(['error' => 'Unauthenticated'], 401);
+    }
+    
+    if ($request->hasFile('image')) {
+        $file = $request->file('image');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $path = $file->storeAs('sliders', $filename, 'public');
+        
+        return response()->json([
+            'success' => true,
+            'path' => $path,
+            'url' => asset('storage/' . $path)
+        ]);
+    }
+    
+    return response()->json(['error' => 'No file uploaded'], 400);
+})->middleware(['auth'])->name('admin.upload.slider');
+
 
