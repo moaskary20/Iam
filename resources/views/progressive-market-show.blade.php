@@ -792,7 +792,7 @@
             
             document.getElementById('method-shipping-price').textContent = `${productPrice.toFixed(2)} ${currency}`;
             document.getElementById('method-ai-price').textContent = `${totalFees.toFixed(2)} ${currency}`;
-            document.getElementById('method-social-price').textContent = `${totalFees.toFixed(2)} ${currency}`;
+            document.getElementById('method-social-price').textContent = `${systemCommission.toFixed(2)} ${currency}`;
             
             document.getElementById('sellMethodPopup').style.display = 'flex';
             document.body.style.overflow = 'hidden';

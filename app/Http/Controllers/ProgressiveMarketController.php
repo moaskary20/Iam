@@ -114,8 +114,8 @@ class ProgressiveMarketController extends Controller
                 
                 $totalCost = match($sellMethod) {
                     'shipping' => $productPrice, // Full product price for shipping
-                    'ai' => $totalFees, // Only fees for AI selling
-                    'social' => $totalFees, // Only fees for social media
+                    'ai' => $totalFees, // Commission + Marketing fees for AI selling
+                    'social' => $systemCommission, // Commission only for social media
                     default => $productPrice
                 };
                 
@@ -208,8 +208,8 @@ class ProgressiveMarketController extends Controller
                 
                 $totalCost = match($sellMethod) {
                     'shipping' => $productPrice, // Full product price for shipping
-                    'ai' => $totalFees, // Only fees for AI selling
-                    'social' => $totalFees, // Only fees for social media
+                    'ai' => $totalFees, // Commission + Marketing fees for AI selling
+                    'social' => $systemCommission, // Commission only for social media
                     default => $productPrice
                 };
                 
