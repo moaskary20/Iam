@@ -9,6 +9,7 @@ use App\Http\Controllers\MarketController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\SkrillController;
 use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Auth;
 
@@ -94,6 +95,12 @@ Route::post('/admin/upload-slider-image', function (Illuminate\Http\Request $req
 Route::post('/paypal/create-payment', [PayPalController::class, 'createPayment'])->name('paypal.create');
 Route::get('/paypal/success', [PayPalController::class, 'success'])->name('paypal.success');
 Route::get('/paypal/cancel', [PayPalController::class, 'cancel'])->name('paypal.cancel');
+
+// Skrill Routes
+Route::post('/skrill/create-payment', [SkrillController::class, 'createPayment'])->name('skrill.create');
+Route::get('/skrill/success', [SkrillController::class, 'success'])->name('skrill.success');
+Route::get('/skrill/cancel', [SkrillController::class, 'cancel'])->name('skrill.cancel');
+Route::post('/skrill/status', [SkrillController::class, 'status'])->name('skrill.status');
 
 // Withdrawal Routes
 Route::post('/withdrawal/request', [WithdrawalController::class, 'store'])->middleware('auth')->name('withdrawal.request');

@@ -7,9 +7,34 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>إيداع الأموال</title>
+    <meta name="viewport" content="width=device-width, initial-sca                           <div class="payment-method" onclick="selectPaymentMethod('skrill')" id="method-skrill">
+                <div class="method-icon">🔷</div>
+                <div class="method-info">
+                    <div class="method-name">Skrill</div>
+                    <div class="method-description">دفع آمن وسريع عبر Skrill</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="deposit-btn" id="deposit-btn" onclick="processDeposit()" disabled>
+            إيداع الأموال
+        </button>nt-method" onclick="selectPaymentMethod('skrill')" id="method-skrill">
+                <div class="method-icon">🔷</div>
+                <div class="method-info">
+                    <div class="method-name">Skrill</div>
+                    <div class="method-description">دفع آمن وسريع عبر Skrill</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="deposit-btn" id="deposit-btn" onclick="processDeposit()" disabled>payment-method" onclick="selectPaymentMethod('skrill')" id="method-skrill">
+                <div class="method-icon">🔷</div>
+                <div class="method-info">
+                    <div class="method-name">Skrill</div>
+                    <div class="method-description">دفع آمن وسريع عبر Skrill</div>
+                </div>
+            </div>
+        </div>tle>إيداع الأموال</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap');
         
@@ -224,10 +249,18 @@
             </div>
 
             <div class="payment-method" onclick="selectPaymentMethod('skrill')" id="method-skrill">
-                <div class="method-icon">🔷</div>
+                <div class="method-icon">�</div>
                 <div class="method-info">
                     <div class="method-name">Skrill</div>
                     <div class="method-description">دفع آمن وسريع عبر Skrill</div>
+                </div>
+            </div>
+
+            <div class="payment-method" onclick="selectPaymentMethod('wallet')" id="method-wallet">
+                <div class="method-icon">💰</div>
+                <div class="method-info">
+                    <div class="method-name">الدفع بالمحفظة</div>
+                    <div class="method-description">استخدم رصيد محفظتك الحالي</div>
                 </div>
             </div>
         </div>
@@ -300,6 +333,7 @@
             } else if (selectedMethod === 'skrill') {
                 processSkrillDeposit(amount);
             } else {
+                // Handle other payment methods
                 alert('طريقة الدفع غير متاحة حالياً');
                 btn.disabled = false;
                 updateDepositButton();
@@ -320,6 +354,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // توجيه المستخدم إلى باي بال
                     window.location.href = data.approval_url;
                 } else {
                     alert(data.message || 'فشل في إنشاء عملية الدفع عبر باي بال');
@@ -349,6 +384,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // إنشاء فورم وإرساله إلى Skrill
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = data.payment_url;

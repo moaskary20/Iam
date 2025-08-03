@@ -55,6 +55,31 @@ class PaymentMethodResource extends Resource
                         ->nullable(),
                 ])
                 ->collapsible()
+                ->collapsed(),
+            
+            Forms\Components\Section::make('إعدادات Skrill')
+                ->description('اتركها فارغة إذا لم تكن طريقة دفع Skrill')
+                ->schema([
+                    Forms\Components\TextInput::make('config.merchant_email')
+                        ->label('Skrill Merchant Email')
+                        ->email()
+                        ->nullable(),
+                    
+                    Forms\Components\TextInput::make('config.merchant_id')
+                        ->label('Skrill Merchant ID')
+                        ->nullable(),
+                    
+                    Forms\Components\TextInput::make('config.secret_word')
+                        ->label('Skrill Secret Word')
+                        ->password()
+                        ->nullable(),
+                    
+                    Forms\Components\TextInput::make('config.currency')
+                        ->label('العملة')
+                        ->default('USD')
+                        ->nullable(),
+                ])
+                ->collapsible()
                 ->collapsed()
         ]);
     }

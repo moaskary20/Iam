@@ -842,6 +842,11 @@
             // التحقق من طريقة الدفع
             if (paymentMethod === 'paypal') {
                 processPayPalPayment(currentProductPrice, 'شراء منتج من متجرنا');
+            } else if (paymentMethod === 'skrill') {
+                processSkrillPayment(currentProductPrice, 'شراء منتج من متجرنا');
+            } else if (paymentMethod === 'wallet') {
+                // معالجة الدفع بالمحفظة
+                processWalletPayment();
             } else {
                 processPurchase(currentProductId, 'shipping', {
                     phone, country, address, paymentMethod
@@ -909,6 +914,38 @@
             .catch(error => {
                 console.error('PayPal Error:', error);
                 alert('حدث خطأ أثناء التوصيل مع باي بال');
+            });
+        }
+        
+        function processSkrillPayment(amount, description) {
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('description', description);
+            formData.append('product_id', currentProductId);
+            formData.append('shipping_phone', document.getElementById('buyerPhone').value);
+            formData.append('shipping_country', document.getElementById('buyerCountry').value);
+            formData.append('shipping_address', document.getElementById('buyerAddress').value);
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
+            fetch('/skrill/create-payment', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.form_html) {
+                    // إنشاء نموذج مخفي وإرساله
+                    const div = document.createElement('div');
+                    div.innerHTML = data.form_html;
+                    document.body.appendChild(div);
+                    div.querySelector('form').submit();
+                } else {
+                    alert(data.message || 'فشل في إنشاء عملية الدفع عبر Skrill');
+                }
+            })
+            .catch(error => {
+                console.error('Skrill Error:', error);
+                alert('حدث خطأ أثناء التوصيل مع Skrill');
             });
         }
         
@@ -1032,11 +1069,10 @@
                     <label>💳 طريقة الدفع</label>
                     <select id="payment-method" required>
                         <option value="">اختر طريقة الدفع</option>
-                        <option value="credit-card">بطاقة ائتمان</option>
                         <option value="cash-on-delivery">الدفع عند الاستلام</option>
-                        <option value="bank-transfer">حوالة بنكية</option>
-                        <option value="mobile-wallet">محفظة إلكترونية</option>
+                        <option value="wallet">الدفع بالمحفظة</option>
                         <option value="paypal">باي بال (PayPal)</option>
+                        <option value="skrill">Skrill</option>
                     </select>
                 </div>
                 

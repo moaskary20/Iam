@@ -15,22 +15,12 @@ class PaymentMethodSeeder extends Seeder
     {
         $paymentMethods = [
             [
-                'name' => 'بطاقة ائتمان',
-                'active' => true,
-                'config' => null
-            ],
-            [
                 'name' => 'الدفع عند الاستلام',
                 'active' => true,
                 'config' => null
             ],
             [
-                'name' => 'حوالة بنكية',
-                'active' => true,
-                'config' => null
-            ],
-            [
-                'name' => 'محفظة إلكترونية',
+                'name' => 'الدفع بالمحفظة',
                 'active' => true,
                 'config' => null
             ],
@@ -41,6 +31,16 @@ class PaymentMethodSeeder extends Seeder
                     'client_id' => env('PAYPAL_CLIENT_ID'),
                     'client_secret' => env('PAYPAL_CLIENT_SECRET'),
                     'mode' => env('PAYPAL_MODE', 'sandbox'),
+                    'currency' => 'USD'
+                ]
+            ],
+            [
+                'name' => 'Skrill',
+                'active' => true,
+                'config' => [
+                    'merchant_email' => env('SKRILL_MERCHANT_EMAIL'),
+                    'merchant_id' => env('SKRILL_MERCHANT_ID'),
+                    'secret_word' => env('SKRILL_SECRET_WORD'),
                     'currency' => 'USD'
                 ]
             ]
