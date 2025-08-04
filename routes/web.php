@@ -16,6 +16,69 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/api/statistics', [HomeController::class, 'getStatistics'])->name('api.statistics');
 
+// Test PayPal route
+Route::get('/test-paypal-debug', function () {
+    return response()->json([
+        'status' => 'success',
+        'paypal_client_id_exists' => !empty(env('PAYPAL_CLIENT_ID')),
+        'paypal_client_secret_exists' => !empty(env('PAYPAL_CLIENT_SECRET')),
+        'paypal_mode' => env('PAYPAL_MODE', 'not_set'),
+        'test_time' => now()->toDateTimeString()
+    ]);
+});
+
+// Test PayPal create payment without CSRF for testing
+Route::post('/test-paypal-create', function (Illuminate\Http\Request $request) {
+    try {
+        $controller = new App\Http\Controllers\PayPalController();
+        $response = $controller->createPayment($request);
+        
+        return $response;
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'خطأ في الاختبار: ' . $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+})->withoutMiddleware(['web', 'csrf']);
+
+// Simple PayPal test route
+Route::get('/simple-paypal-test', function () {
+    try {
+        echo "<h1>🔍 اختبار PayPal في Laravel</h1>";
+        
+        echo "<div style='background: #f0f8ff; padding: 15px; margin: 10px 0; border-radius: 5px;'>";
+        echo "<h3>متغيرات البيئة:</h3>";
+        echo "PAYPAL_CLIENT_ID: " . (env('PAYPAL_CLIENT_ID') ? '✅ موجود (' . substr(env('PAYPAL_CLIENT_ID'), 0, 15) . '...)' : '❌ غير موجود') . "<br>";
+        echo "PAYPAL_CLIENT_SECRET: " . (env('PAYPAL_CLIENT_SECRET') ? '✅ موجود (' . substr(env('PAYPAL_CLIENT_SECRET'), 0, 15) . '...)' : '❌ غير موجود') . "<br>";
+        echo "PAYPAL_MODE: " . (env('PAYPAL_MODE') ?: 'غير محدد') . "<br>";
+        echo "</div>";
+        
+        // اختبار PayPalService
+        echo "<div style='background: #f0fff0; padding: 15px; margin: 10px 0; border-radius: 5px;'>";
+        echo "<h3>اختبار PayPalService:</h3>";
+        
+        try {
+            $paypalService = new App\Services\PayPalService();
+            echo "✅ تم إنشاء PayPalService بنجاح<br>";
+            
+            $token = $paypalService->getAccessToken();
+            echo "✅ تم الحصول على Access Token: " . substr($token, 0, 20) . "...<br>";
+            
+        } catch (Exception $e) {
+            echo "❌ فشل في PayPalService: " . $e->getMessage() . "<br>";
+        }
+        echo "</div>";
+    
+    } catch (Exception $e) {
+        echo "<div style='background: #ffeeee; padding: 15px; margin: 10px 0; border-radius: 5px; color: red;'>";
+        echo "❌ خطأ عام: " . $e->getMessage();
+        echo "</div>";
+    }
+});
+
 Route::get('/profile', function () {
     $user = Auth::user();
     if (!$user) {

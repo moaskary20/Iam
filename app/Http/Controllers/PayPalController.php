@@ -17,7 +17,10 @@ class PayPalController extends Controller
         try {
             $this->paypalService = new PayPalService();
         } catch (Exception $e) {
-            // PayPal service not available
+            // Log the actual error for debugging
+            \Log::error('PayPal Service initialization failed: ' . $e->getMessage());
+            \Log::error('PayPal Error Stack: ' . $e->getTraceAsString());
+            $this->paypalService = null;
         }
     }
 
@@ -27,7 +30,7 @@ class PayPalController extends Controller
             if (!$this->paypalService) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'خدمة باي بال غير متاحة'
+                    'message' => 'خدمة باي بال غير متاحة. يرجى التحقق من إعدادات PayPal في ملف .env'
                 ], 400);
             }
 

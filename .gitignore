@@ -18,7 +18,21 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/logs
 /vendor
+
+# PayPal Testing Files (temporary)
+test_*.php
+*_test.php
+check_*.php
+simple_paypal_check.php
+direct_env_test.php
+quick_paypal_test.php
+public/test-*.php
+public/*-test.html
+public/paypal-*.html
+public/ajax-*.html
+public/final-*.html
 Homestead.json
 Homestead.yaml
 Thumbs.db
