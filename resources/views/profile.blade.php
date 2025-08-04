@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>الملف الشخصي</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
@@ -20,6 +20,9 @@
             overflow-x: hidden;
             position: relative;
             padding-bottom: 100px; /* مسافة أسفل الصفحة للمنيو السفلي */
+            margin: 0;
+            width: 100%;
+            max-width: 100vw;
         }
 
         /* Simple Background Animation */
@@ -36,18 +39,16 @@
         }
 
         .container {
-            max-width: 450px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Profile Header */
+            width: 100%;
+            box-sizing: border-box;
+        }        /* Profile Header */
         .profile-header {
             text-align: center;
             margin-bottom: 30px;
-            animation: slideDown 0.8s ease-out;
+            /* animation: slideDown 0.8s ease-out; */
         }
 
         @keyframes slideDown {
@@ -74,7 +75,7 @@
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             padding: 5px;
             position: relative;
-            animation: pulse 2s infinite;
+            /* animation: pulse 2s infinite; */
         }
 
         @keyframes pulse {
@@ -112,8 +113,8 @@
             padding: 30px;
             margin-bottom: 20px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-            animation: slideUp 0.8s ease-out;
-            animation-fill-mode: both;
+            /* animation: slideUp 0.8s ease-out; */
+            /* animation-fill-mode: both; */
             transition: all 0.3s ease;
         }
 
@@ -172,7 +173,7 @@
             border-radius: 20px;
             font-weight: 600;
             font-size: 14px;
-            animation: fadeIn 1s ease-out;
+            /* animation: fadeIn 1s ease-out; */
         }
 
         .status-pending {
@@ -216,7 +217,7 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: shine 3s infinite;
+            /* animation: shine 3s infinite; */
         }
 
         @keyframes shine {
@@ -228,9 +229,9 @@
         .referral-message {
             text-align: center;
             margin-top: 30px;
-            animation: bounceIn 1s ease-out;
-            animation-delay: 0.5s;
-            animation-fill-mode: both;
+            /* animation: bounceIn 1s ease-out; */
+            /* animation-delay: 0.5s; */
+            /* animation-fill-mode: both; */
         }
 
         @keyframes bounceIn {
@@ -269,7 +270,7 @@
             width: 200%;
             height: 200%;
             background: conic-gradient(transparent, rgba(255,255,255,0.1), transparent 30%);
-            animation: rotate 4s linear infinite;
+            /* animation: rotate 4s linear infinite; */
         }
 
         @keyframes rotate {
@@ -300,38 +301,364 @@
         }
 
         /* Responsive */
-        @media (max-width: 480px) {
+        /* Media Queries for Mobile Devices */
+
+        /* Tablets and Small Laptops */
+        @media (max-width: 768px) {
             .container {
                 padding: 15px;
                 max-width: 100%;
             }
-            
-            .info-card {
+
+            .page-title {
+                font-size: 32px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .profile-card {
+                margin: 0 0 20px 0;
                 padding: 20px;
                 border-radius: 15px;
             }
-            
-            .user-name {
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .profile-avatar {
+                margin-bottom: 15px;
+            }
+
+            .profile-info h2 {
                 font-size: 24px;
+                margin-bottom: 5px;
             }
-            
-            .referral-text {
-                font-size: 18px;
+
+            .wallet-info {
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-top: 20px;
             }
-            
-            .dollar-amount {
-                font-size: 28px;
+
+            .info-item {
+                padding: 12px 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .info-item:hover {
+                margin: 0 -10px;
+                padding: 12px 10px;
+            }
+
+            .info-label {
+                font-size: 14px;
+                color: #666;
+            }
+
+            .info-value {
+                font-size: 16px;
+                font-weight: 600;
+                color: #333;
             }
         }
 
-        @keyframes fadeIn {
+        /* Mobile Phones (Portrait) */
+        @media (max-width: 480px) {
+            body {
+                padding-bottom: 120px;
+                font-size: 14px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .page-title {
+                font-size: 28px;
+                margin-bottom: 15px;
+                padding: 0 10px;
+            }
+
+            .profile-card {
+                margin: 0 0 15px 0;
+                padding: 15px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .profile-header {
+                gap: 10px;
+                padding-bottom: 15px;
+            }
+
+            .profile-avatar img {
+                width: 80px;
+                height: 80px;
+                border: 3px solid #fff;
+            }
+
+            .profile-info h2 {
+                font-size: 20px;
+                margin-bottom: 3px;
+                line-height: 1.2;
+            }
+
+            .profile-info p {
+                font-size: 14px;
+                margin: 2px 0;
+            }
+
+            .wallet-info {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .wallet-item {
+                padding: 12px;
+                text-align: center;
+                border-radius: 10px;
+            }
+
+            .wallet-item .amount {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+
+            .wallet-item .label {
+                font-size: 12px;
+                opacity: 0.8;
+            }
+
+            .info-item {
+                padding: 10px 0;
+                border-bottom: 1px solid rgba(0,0,0,0.08);
+            }
+
+            .info-item:hover {
+                margin: 0 -8px;
+                padding: 10px 8px;
+                border-radius: 8px;
+            }
+
+            .info-label {
+                font-size: 13px;
+                font-weight: 500;
+            }
+
+            .info-value {
+                font-size: 15px;
+                font-weight: 600;
+                margin-top: 3px;
+            }
+
+            .status-badge {
+                padding: 4px 8px;
+                font-size: 12px;
+                border-radius: 15px;
+            }
+
+            /* Action buttons if any */
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+                border-radius: 8px;
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+
+        /* Small Mobile Phones */
+        @media (max-width: 360px) {
+            .container {
+                padding: 8px;
+            }
+
+            .page-title {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .profile-card {
+                padding: 12px;
+                margin: 0 0 12px 0;
+            }
+
+            .profile-avatar img {
+                width: 70px;
+                height: 70px;
+                border: 2px solid #fff;
+            }
+
+            .profile-info h2 {
+                font-size: 18px;
+            }
+
+            .profile-info p {
+                font-size: 13px;
+            }
+
+            .wallet-item {
+                padding: 10px;
+            }
+
+            .wallet-item .amount {
+                font-size: 18px;
+            }
+
+            .wallet-item .label {
+                font-size: 11px;
+            }
+
+            .info-item {
+                padding: 8px 0;
+            }
+
+            .info-label {
+                font-size: 12px;
+            }
+
+            .info-value {
+                font-size: 14px;
+            }
+
+            .status-badge {
+                padding: 3px 6px;
+                font-size: 11px;
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding-bottom: 80px;
+            }
+
+            .profile-header {
+                flex-direction: row;
+                text-align: left;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .profile-avatar {
+                margin-bottom: 0;
+            }
+
+            .wallet-info {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        /* Additional Mobile Optimizations */
+        @media (max-width: 480px) {
+            /* Prevent horizontal scroll */
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                overflow-x: hidden;
+                width: 100%;
+                max-width: 100vw;
+            }
+
+            /* Improve touch targets */
+            .info-item {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+
+            /* Better spacing for cards */
+            .card {
+                margin: 8px 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Optimize text for mobile */
+            body {
+                font-size: 16px; /* Prevent zoom on iOS */
+                line-height: 1.4;
+            }
+
+            /* Improve button spacing */
+            .btn + .btn {
+                margin-top: 10px;
+            }
+
+            /* Better form elements if any */
+            input, select, textarea {
+                font-size: 16px; /* Prevent zoom on iOS */
+                padding: 12px;
+                border-radius: 8px;
+            }
+        }
+
+        /* Ultra small screens */
+        @media (max-width: 320px) {
+            .container {
+                padding: 5px;
+            }
+
+            .profile-card {
+                padding: 10px;
+                border-radius: 8px;
+            }
+
+            .page-title {
+                font-size: 20px;
+                padding: 0 5px;
+            }
+
+            .profile-avatar img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .profile-info h2 {
+                font-size: 16px;
+            }
+
+            .wallet-item .amount {
+                font-size: 16px;
+            }
+
+            .info-label {
+                font-size: 11px;
+            }
+
+            .info-value {
+                font-size: 13px;
+            }
+        }
+
+        /* Original mobile CSS (keeping existing) */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            .card {
+                padding: 15px;
+                margin: 10px 0;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }        @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
 
         /* Delay animations for staggered effect */
-        .info-card:nth-child(2) { animation-delay: 0.2s; }
-        .info-card:nth-child(3) { animation-delay: 0.4s; }
+        /* .info-card:nth-child(2) { animation-delay: 0.2s; } */
+        /* .info-card:nth-child(3) { animation-delay: 0.4s; } */
 
         /* Hide mobile nav on desktop */
         @media (min-width: 768px) {

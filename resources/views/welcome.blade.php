@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>تطبيق IAM</title>
     <!-- Updated version with local server layout -->
     
@@ -132,6 +132,7 @@
             margin: 0;
             padding: 0;
             width: 100%;
+            max-width: 100vw;
         }
         /* Background Animation */
         .bg-shapes {
@@ -272,6 +273,8 @@
         .container {
             max-width: 100%;
             margin: 0 auto;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         /* Desktop Navigation */
@@ -705,6 +708,14 @@
             .info-value {
                 font-size: 1rem;
             }
+            
+            .mobile-nav {
+                display: block;
+            }
+            
+            .desktop-nav {
+                display: none;
+            }
         }
         
         @media (max-width: 480px) {
@@ -743,16 +754,87 @@
                 font-size: 0.9rem;
                 line-height: 1.1;
             }
+            
+            .header-content {
+                padding: 0 0.5rem;
+            }
+            
+            .logo {
+                font-size: 1.4rem;
+            }
+            
+            .auth-toggle {
+                padding: 0.5rem 1rem;
+                font-size: 12px;
+            }
+            
+            .main-content {
+                padding: 1rem 0.5rem;
+                padding-bottom: 6rem;
+            }
+            
+            .content-grid {
+                gap: 1rem;
+            }
+            
+            .content-card {
+                padding: 1rem;
+                border-radius: 0.75rem;
+            }
         }
-                font-size: 0.9rem !important;
+        
+        /* Extra small mobile devices */
+        @media (max-width: 360px) {
+            .slider-user-container {
+                padding: 0 5px !important;
             }
             
-            .user-info-card > div:first-child {
-                font-size: 0.85rem !important;
+            .user-info-grid {
+                gap: 8px !important;
+                padding: 0 2px;
             }
             
-            .user-info-card > div:last-child {
-                font-size: 1rem !important;
+            .user-info-card.enhanced {
+                padding: 0.8rem 0.4rem;
+                min-height: 90px;
+                max-height: 90px;
+            }
+            
+            .info-icon {
+                font-size: 1.4rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .info-label {
+                font-size: 0.7rem;
+                margin-bottom: 0.2rem;
+            }
+            
+            .info-value {
+                font-size: 0.8rem;
+                line-height: 1.0;
+            }
+            
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .auth-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 11px;
+            }
+            
+            .content-card {
+                padding: 0.8rem;
+                margin-bottom: 1rem;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .card-description {
+                font-size: 0.9rem;
             }
         }
         
