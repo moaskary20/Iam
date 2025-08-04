@@ -20,8 +20,15 @@ class HomeController extends Controller
             // Get user-specific statistics
             $statistics = $this->getUserStatistics($user);
         } else {
-            // Get general system statistics for guests
-            $statistics = $this->getRealtimeStatistics();
+            // For demo purposes, show first user's statistics instead of system stats
+            $demoUser = User::first();
+            if ($demoUser) {
+                $statistics = $this->getUserStatistics($demoUser);
+                $user = $demoUser; // Set for template display
+            } else {
+                // Fallback to system statistics if no users exist
+                $statistics = $this->getRealtimeStatistics();
+            }
         }
         
         return view('welcome', compact('user', 'sliders', 'statistics'));
