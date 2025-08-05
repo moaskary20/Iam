@@ -11,12 +11,12 @@ class FixLivewireSSL
     /**
      * Handle an incoming request.
      * 
-     * هذا الـ middleware يحل مشاكل Livewire مع SSL
+     * هذا الـ middleware يحل مشاكل Livewire مع Cloudflare Full SSL
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // إصلاح مشاكل Livewire مع HTTPS
-        $this->fixLivewireHttps($request);
+        // إصلاح مشاكل Livewire مع Cloudflare Full SSL
+        $this->fixCloudflareFullSSL($request);
         
         // إصلاح مشاكل Alpine.js expressions
         $this->setupAlpineJsEnvironment();
@@ -30,17 +30,38 @@ class FixLivewireSSL
     }
     
     /**
-     * إصلاح مشاكل Livewire مع HTTPS
+     * إصلاح مشاكل Livewire مع Cloudflare Full SSL
      */
-    protected function fixLivewireHttps(Request $request): void
+    protected function fixCloudflareFullSSL(Request $request): void
     {
-        // إذا كان هناك Livewire request، تأكد من إعدادات HTTPS الصحيحة
+        // إذا كان هناك Livewire request، تأكد من إعدادات Full SSL الصحيحة
         if ($request->header('X-Livewire')) {
-            // إعداد الـ scheme بشكل صحيح
-            if (!$request->isSecure() && env('FORCE_HTTPS', false)) {
-                $request->server->set('HTTPS', 'on');
-                $request->server->set('SERVER_PORT', 443);
-                $request->server->set('REQUEST_SCHEME', 'https');
+            
+            // مع Cloudflare Full SSL، Cloudflare يتصل بالسيرفر عبر HTTPS
+            // لذلك Laravel يجب أن يرى الاتصال كـ HTTPS
+            
+            // فحص وجود CF headers
+            $hasCFRay = $request->header('CF-Ray');
+            $cfVisitor = $request->header('CF-Visitor');
+            $forwardedProto = $request->header('X-Forwarded-Proto');
+            
+            if ($hasCFRay || $cfVisitor || $forwardedProto === 'https') {
+                // إعداد الـ scheme بشكل صحيح للـ Full SSL
+                if (!$request->isSecure()) {
+                    $request->server->set('HTTPS', 'on');
+                    $request->server->set('SERVER_PORT', 443);
+                    $request->server->set('REQUEST_SCHEME', 'https');
+                    
+                    // تحديث $_SERVER globals أيضاً
+                    $_SERVER['HTTPS'] = 'on';
+                    $_SERVER['SERVER_PORT'] = 443;
+                    $_SERVER['REQUEST_SCHEME'] = 'https';
+                }
+                
+                // إعداد headers للـ Livewire
+                if (!$request->header('X-Forwarded-Proto')) {
+                    $request->headers->set('X-Forwarded-Proto', 'https');
+                }
             }
             
             // إعداد الـ host بشكل صحيح

@@ -20,8 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // إعدادات Cloudflare Flexible SSL
-        $this->configureCloudflareFlexibleSSL();
+        // إعدادات Cloudflare Full SSL + Let's Encrypt
+        $this->configureCloudflareFullSSL();
         
         // حل مؤقت لمشكلة array offset errors في Livewire
         error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
@@ -127,32 +127,33 @@ class AppServiceProvider extends ServiceProvider
     /**
      * إعداد Cloudflare Flexible SSL
      */
-    protected function configureCloudflareFlexibleSSL(): void
+    protected function configureCloudflareFullSSL(): void
     {
-        // مع Let's Encrypt + Cloudflare، نحتاج إعدادات مختلفة
-        // عن Flexible SSL فقط
+        // مع Cloudflare Full SSL + Let's Encrypt:
+        // - User → Cloudflare: HTTPS
+        // - Cloudflare → Server: HTTPS (Let's Encrypt)
+        // - Laravel يحتاج إعدادات مختلفة عن Flexible SSL
         
-        $hasLetEncryptSSL = false;
-        $hasCloudflareSSL = false;
+        $hasCloudflareFullSSL = false;
+        $hasDirectSSL = false;
         
         // فحص وجود Let's Encrypt SSL مباشرة
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-            $hasLetEncryptSSL = true;
+            $hasDirectSSL = true;
         }
         
-        // فحص وجود Cloudflare
-        if (isset($_SERVER['HTTP_CF_RAY']) || isset($_SERVER['HTTP_CF_VISITOR'])) {
-            $hasCloudflareSSL = true;
+        // فحص وجود Cloudflare مع Full SSL
+        if (isset($_SERVER['HTTP_CF_RAY'])) {
+            $hasCloudflareFullSSL = true;
+            
+            // مع Full SSL، Cloudflare يرسل X-Forwarded-Proto: https
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+                $hasDirectSSL = true; // نعامله كـ SSL مباشر
+            }
         }
         
-        // إجبار HTTPS للـ URLs في حالة وجود X-Forwarded-Proto
-        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-            URL::forceScheme('https');
-            $_SERVER['HTTPS'] = 'on';
-        }
-        
-        // إجبار HTTPS إذا كان الموقع في production أو لديه Let's Encrypt
-        if (env('APP_ENV') === 'production' || $hasLetEncryptSSL) {
+        // إجبار HTTPS للـ URLs
+        if ($hasDirectSSL || $hasCloudflareFullSSL || env('APP_ENV') === 'production') {
             URL::forceScheme('https');
         }
         
@@ -161,26 +162,34 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
         
-        // إعداد خاص للـ Livewire مع SSL (Let's Encrypt أو Cloudflare)
+        // إعداد Livewire للعمل مع Full SSL
         if (class_exists(\Livewire\Livewire::class)) {
-            // إعداد Livewire للعمل مع SSL بشكل صحيح
             \Livewire\Livewire::setUpdateRoute(function ($handle) {
                 return \Illuminate\Support\Facades\Route::post('/livewire/update', $handle)
                     ->middleware(['web']);
             });
             
-            // إعداد asset URL للـ Livewire
-            if ($hasLetEncryptSSL || $hasCloudflareSSL || env('FORCE_HTTPS', false)) {
-                config(['livewire.asset_url' => null]); // استخدام الـ URL الافتراضي مع HTTPS
+            // مع Full SSL، نستطيع استخدام الـ asset URL الافتراضي
+            if ($hasDirectSSL || $hasCloudflareFullSSL) {
+                config(['livewire.asset_url' => null]);
             }
         }
         
-        // إعداد session cookies للعمل مع HTTPS
-        if ($hasLetEncryptSSL || env('FORCE_HTTPS', false)) {
+        // إعداد session cookies للعمل مع Full SSL
+        if ($hasDirectSSL || env('FORCE_HTTPS', false)) {
             config([
                 'session.secure' => true,
-                'session.same_site' => 'lax'
+                'session.same_site' => 'lax',
+                'session.http_only' => true
             ]);
+        }
+        
+        // إعداد خاص لـ Alpine.js مع Cloudflare Full SSL
+        if ($hasCloudflareFullSSL) {
+            // تجنب مشاكل Mixed Content
+            if (!isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+                $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
+            }
         }
     }
 }

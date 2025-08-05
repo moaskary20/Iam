@@ -81,25 +81,30 @@ class TrustProxies extends Middleware
     
     /**
      * إجبار HTTPS scheme باستخدام X-Forwarded-Proto header
-     * محدث للعمل مع Cloudflare + Let's Encrypt
+     * محدث للعمل مع Cloudflare Full SSL + Let's Encrypt
      */
     protected function forceHttpsScheme(Request $request): void
     {
         $shouldForceHttps = false;
         
-        // أولوية الفحص:
-        // 1. Let's Encrypt SSL الأصلي (إذا كان الاتصال مباشر بـ HTTPS)
-        if ($request->isSecure()) {
-            return; // الاتصال آمن بالفعل
+        // مع Cloudflare Full SSL، التصحيح مختلف:
+        // 1. Cloudflare → User: HTTPS
+        // 2. Cloudflare → Server: HTTPS (مع Let's Encrypt)
+        // 3. Laravel يجب أن يكتشف HTTPS بشكل صحيح
+        
+        // أولاً: فحص إذا كان SSL أصلي (Let's Encrypt)
+        if ($request->isSecure() && $request->getScheme() === 'https') {
+            // الاتصال آمن بالفعل، لا حاجة لتعديل
+            return;
         }
         
-        // 2. فحص X-Forwarded-Proto header من Cloudflare أو Load Balancer
+        // ثانياً: فحص headers من Cloudflare Full SSL
         $forwardedProto = $request->header('X-Forwarded-Proto');
         if ($forwardedProto === 'https') {
             $shouldForceHttps = true;
         }
         
-        // 3. فحص CF-Visitor header من Cloudflare
+        // ثالثاً: فحص CF-Visitor header
         $cfVisitor = $request->header('CF-Visitor');
         if ($cfVisitor) {
             $visitor = json_decode($cfVisitor, true);
@@ -108,29 +113,27 @@ class TrustProxies extends Middleware
             }
         }
         
-        // 4. فحص إعدادات البيئة للإجبار
+        // رابعاً: إذا كان من Cloudflare ولديه Let's Encrypt، افترض HTTPS
+        if ($request->header('CF-Ray') && !$shouldForceHttps) {
+            // مع Full SSL، Cloudflare يتصل بالسيرفر عبر HTTPS
+            $shouldForceHttps = true;
+        }
+        
+        // خامساً: إعدادات البيئة
         if (env('FORCE_HTTPS', false) || env('APP_ENV') === 'production') {
             $shouldForceHttps = true;
         }
         
-        // 5. للتأكد مع Cloudflare: إذا كان الطلب من Cloudflare واحتوى على CF-Ray
-        if ($request->header('CF-Ray')) {
-            $shouldForceHttps = true;
-        }
-        
-        // تطبيق إعدادات HTTPS إذا كان مطلوب
+        // تطبيق إعدادات HTTPS
         if ($shouldForceHttps) {
-            // تعديل request server variables
             $request->server->set('HTTPS', 'on');
             $request->server->set('SERVER_PORT', 443);
             $request->server->set('REQUEST_SCHEME', 'https');
             
-            // تعديل PHP globals
             $_SERVER['HTTPS'] = 'on';
             $_SERVER['SERVER_PORT'] = 443;
             $_SERVER['REQUEST_SCHEME'] = 'https';
             
-            // تعديل HTTP_X_FORWARDED_PROTO إذا لم يكن موجود
             if (!$request->header('X-Forwarded-Proto')) {
                 $request->headers->set('X-Forwarded-Proto', 'https');
                 $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
