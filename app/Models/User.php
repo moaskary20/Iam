@@ -201,12 +201,215 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Withdrawal::class);
     }
 
+    // ========================================
+    // Roles & Permissions Relations
+    // ========================================
+
+    /**
+     * العلاقة مع الأدوار
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'user_roles')
+            ->withTimestamps();
+    }
+
+    /**
+     * العلاقة مع الصلاحيات المباشرة
+     */
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'user_permissions')
+            ->withTimestamps();
+    }
+
+    /**
+     * التحقق من وجود دور معين
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()
+            ->where('name', $role)
+            ->where('is_active', true)
+            ->exists();
+    }
+
+    /**
+     * التحقق من وجود أي من الأدوار المحددة
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        return $this->roles()
+            ->whereIn('name', $roles)
+            ->where('is_active', true)
+            ->exists();
+    }
+
+    /**
+     * التحقق من وجود جميع الأدوار المحددة
+     */
+    public function hasAllRoles(array $roles): bool
+    {
+        return $this->roles()
+            ->whereIn('name', $roles)
+            ->where('is_active', true)
+            ->count() === count($roles);
+    }
+
+    /**
+     * إضافة دور للمستخدم
+     */
+    public function assignRole(string|Role $role): void
+    {
+        if (is_string($role)) {
+            $role = Role::where('name', $role)->first();
+        }
+
+        if ($role && !$this->hasRole($role->name)) {
+            $this->roles()->attach($role);
+        }
+    }
+
+    /**
+     * إزالة دور من المستخدم
+     */
+    public function removeRole(string|Role $role): void
+    {
+        if (is_string($role)) {
+            $role = Role::where('name', $role)->first();
+        }
+
+        if ($role) {
+            $this->roles()->detach($role);
+        }
+    }
+
+    /**
+     * التحقق من وجود صلاحية معينة
+     */
+    public function hasPermission(string $permission): bool
+    {
+        // فحص الصلاحيات المباشرة
+        $directPermission = $this->permissions()
+            ->where('name', $permission)
+            ->where('is_active', true)
+            ->exists();
+
+        if ($directPermission) {
+            return true;
+        }
+
+        // فحص الصلاحيات عبر الأدوار
+        return $this->roles()
+            ->where('is_active', true)
+            ->whereHas('permissions', function ($query) use ($permission) {
+                $query->where('name', $permission)
+                    ->where('is_active', true);
+            })
+            ->exists();
+    }
+
+    /**
+     * التحقق من وجود أي من الصلاحيات المحددة
+     */
+    public function hasAnyPermission(array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * إضافة صلاحية مباشرة للمستخدم
+     */
+    public function givePermission(string|Permission $permission): void
+    {
+        if (is_string($permission)) {
+            $permission = Permission::where('name', $permission)->first();
+        }
+
+        if ($permission && !$this->hasDirectPermission($permission->name)) {
+            $this->permissions()->attach($permission);
+        }
+    }
+
+    /**
+     * إزالة صلاحية مباشرة من المستخدم
+     */
+    public function revokePermission(string|Permission $permission): void
+    {
+        if (is_string($permission)) {
+            $permission = Permission::where('name', $permission)->first();
+        }
+
+        if ($permission) {
+            $this->permissions()->detach($permission);
+        }
+    }
+
+    /**
+     * التحقق من وجود صلاحية مباشرة (بدون الأدوار)
+     */
+    public function hasDirectPermission(string $permission): bool
+    {
+        return $this->permissions()
+            ->where('name', $permission)
+            ->where('is_active', true)
+            ->exists();
+    }
+
+    /**
+     * الحصول على جميع الصلاحيات (مباشرة + عبر الأدوار)
+     */
+    public function getAllPermissions()
+    {
+        $directPermissions = $this->permissions()
+            ->where('is_active', true)
+            ->get();
+
+        $rolePermissions = Permission::whereHas('roles', function ($query) {
+            $query->whereIn('id', $this->roles()->where('is_active', true)->pluck('id'));
+        })->where('is_active', true)->get();
+
+        return $directPermissions->merge($rolePermissions)->unique('id');
+    }
+
+    /**
+     * التحقق من كونه Super Admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('super_admin') || $this->hasPermission('super_admin');
+    }
+
+    /**
+     * التحقق من كونه Admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin') || $this->hasRole('super_admin');
+    }
+
+    /**
+     * الحصول على أعلى دور للمستخدم
+     */
+    public function getHighestRole()
+    {
+        return $this->roles()
+            ->where('is_active', true)
+            ->orderBy('priority', 'asc')
+            ->first();
+    }
+
     /**
      * Determine if the user can access the given Filament panel.
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // السماح لجميع المستخدمين بالدخول لـ admin panel
-        return true;
+        // التحقق من الصلاحيات للوصول للوحة التحكم
+        return $this->hasAnyPermission(['access_admin', 'super_admin']) || $this->isAdmin();
     }
 }

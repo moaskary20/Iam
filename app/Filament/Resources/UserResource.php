@@ -25,9 +25,9 @@ class UserResource extends Resource
     
     protected static ?string $pluralModelLabel = 'المستخدمون';
     
-    protected static ?string $navigationGroup = 'إدارة المستخدمين';
+    protected static ?string $navigationGroup = 'إدارة المستخدمين والصلاحيات';
     
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -135,6 +135,51 @@ class UserResource extends Resource
                             ->image(),
                     ])
                     ->columns(2),
+                    
+                Forms\Components\Section::make('الأدوار والصلاحيات')
+                    ->description('تحديد أدوار وصلاحيات المستخدم')
+                    ->schema([
+                        Forms\Components\CheckboxList::make('roles')
+                            ->label('الأدوار')
+                            ->relationship('roles', 'display_name')
+                            ->options(function () {
+                                return \App\Models\Role::where('is_active', true)
+                                    ->orderBy('priority')
+                                    ->pluck('display_name', 'id');
+                            })
+                            ->descriptions(function () {
+                                return \App\Models\Role::where('is_active', true)
+                                    ->pluck('description', 'id')
+                                    ->toArray();
+                            })
+                            ->columns(2)
+                            ->helperText('الأدوار تمنح مجموعة من الصلاحيات للمستخدم'),
+                            
+                        Forms\Components\CheckboxList::make('permissions')
+                            ->label('صلاحيات إضافية مباشرة')
+                            ->relationship('permissions', 'display_name')
+                            ->options(function () {
+                                return \App\Models\Permission::where('is_active', true)
+                                    ->orderBy('group')
+                                    ->orderBy('priority')
+                                    ->get()
+                                    ->groupBy('group')
+                                    ->map(function ($permissions, $group) {
+                                        return $permissions->pluck('display_name', 'id')->toArray();
+                                    })
+                                    ->toArray();
+                            })
+                            ->descriptions(function () {
+                                return \App\Models\Permission::where('is_active', true)
+                                    ->pluck('description', 'id')
+                                    ->toArray();
+                            })
+                            ->columns(2)
+                            ->helperText('صلاحيات إضافية مباشرة للمستخدم (بالإضافة للصلاحيات من الأدوار)')
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -182,6 +227,37 @@ class UserResource extends Resource
                     ->label('الرصيد')
                     ->money('USD')
                     ->sortable(),
+                    
+                Tables\Columns\TextColumn::make('roles.display_name')
+                    ->label('الأدوار')
+                    ->badge()
+                    ->separator(',')
+                    ->color('success')
+                    ->limit(2)
+                    ->tooltip(function ($record) {
+                        return $record->roles->pluck('display_name')->join(', ');
+                    }),
+                    
+                Tables\Columns\TextColumn::make('highest_role')
+                    ->label('أعلى دور')
+                    ->getStateUsing(function ($record) {
+                        $highestRole = $record->getHighestRole();
+                        return $highestRole ? $highestRole->display_name : 'مستخدم عادي';
+                    })
+                    ->badge()
+                    ->color(function ($record) {
+                        $highestRole = $record->getHighestRole();
+                        if (!$highestRole) return 'gray';
+                        
+                        return match ($highestRole->name) {
+                            'super_admin' => 'danger',
+                            'admin' => 'warning',
+                            'moderator' => 'info',
+                            'editor' => 'primary',
+                            default => 'gray',
+                        };
+                    }),
+                    
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ التسجيل')
                     ->dateTime('Y-m-d H:i')
@@ -200,6 +276,16 @@ class UserResource extends Resource
                         'verified' => 'مُتحقق',
                         'rejected' => 'مرفوض',
                     ]),
+                Tables\Filters\SelectFilter::make('roles')
+                    ->label('الأدوار')
+                    ->relationship('roles', 'display_name')
+                    ->multiple()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('permissions')
+                    ->label('الصلاحيات')
+                    ->relationship('permissions', 'display_name')
+                    ->multiple()
+                    ->preload(),
                 Tables\Filters\SelectFilter::make('country')
                     ->label('البلد')
                     ->searchable()

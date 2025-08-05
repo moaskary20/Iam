@@ -28,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
         // حل مؤقت لمشكلة array offset errors في Livewire
         error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
         
+        // تسجيل Blade Directives للأدوار والصلاحيات
+        $this->registerBladeDirectives();
+        
         set_error_handler(function ($severity, $message, $file, $line) {
             // تجاهل أخطاء array offset على null فقط
             if (str_contains($message, 'Trying to access array offset on value of type null')) {
@@ -72,6 +75,54 @@ class AppServiceProvider extends ServiceProvider
             
             // للأخطاء الأخرى، استخدم error handler الافتراضي
             return false;
+        });
+    }
+    
+    /**
+     * تسجيل Blade Directives للأدوار والصلاحيات
+     */
+    private function registerBladeDirectives(): void
+    {
+        // directive للتحقق من الصلاحيات
+        \Blade::if('permission', function (...$permissions) {
+            if (!auth()->check()) {
+                return false;
+            }
+            
+            $user = auth()->user();
+            
+            // إذا كان Super Admin، السماح بكل شيء
+            if ($user->isSuperAdmin()) {
+                return true;
+            }
+            
+            return $user->hasAnyPermission($permissions);
+        });
+        
+        // directive للتحقق من الأدوار
+        \Blade::if('role', function (...$roles) {
+            if (!auth()->check()) {
+                return false;
+            }
+            
+            $user = auth()->user();
+            
+            // إذا كان Super Admin، السماح بكل شيء
+            if ($user->isSuperAdmin()) {
+                return true;
+            }
+            
+            return $user->hasAnyRole($roles);
+        });
+        
+        // directive للتحقق من كونه Super Admin
+        \Blade::if('superadmin', function () {
+            return auth()->check() && auth()->user()->isSuperAdmin();
+        });
+        
+        // directive للتحقق من كونه Admin
+        \Blade::if('admin', function () {
+            return auth()->check() && auth()->user()->isAdmin();
         });
     }
 }
