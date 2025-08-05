@@ -13,6 +13,7 @@ use App\Http\Controllers\SkrillController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ServerTestController;
+use App\Http\Controllers\CloudflareTestController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -21,6 +22,10 @@ Route::get('/api/statistics', [HomeController::class, 'getStatistics'])->name('a
 // Server Test Routes
 Route::get('/test-server', [ServerTestController::class, 'showTestPage'])->name('test.server');
 Route::get('/test-upload-api', [ServerTestController::class, 'testUpload'])->name('test.upload.api');
+
+// Cloudflare Test Routes
+Route::get('/test-cloudflare', [CloudflareTestController::class, 'showTestPage'])->name('test.cloudflare');
+Route::get('/test-cloudflare-api', [CloudflareTestController::class, 'testCloudflare'])->name('test.cloudflare.api');
 
 // Admin User Creation Routes
 Route::get('/admin/create-user', [AdminUserController::class, 'showCreateForm'])->name('admin.create-user-form');

@@ -20,10 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // إجبار التطبيق على استخدام HTTPS في وضع الإنتاج
-        if (env('APP_ENV') === 'production') {
-            URL::forceScheme('https');
-        }
+        // إعدادات Cloudflare Flexible SSL
+        $this->configureCloudflareFlexibleSSL();
         
         // حل مؤقت لمشكلة array offset errors في Livewire
         error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
@@ -124,5 +122,38 @@ class AppServiceProvider extends ServiceProvider
         \Blade::if('admin', function () {
             return auth()->check() && auth()->user()->isAdmin();
         });
+    }
+    
+    /**
+     * إعداد Cloudflare Flexible SSL
+     */
+    protected function configureCloudflareFlexibleSSL(): void
+    {
+        // مع Flexible SSL، Cloudflare يتصل بالسيرفر عبر HTTP
+        // لكن المستخدمين يصلون عبر HTTPS
+        
+        // إجبار HTTPS للـ URLs في حالة وجود X-Forwarded-Proto
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            URL::forceScheme('https');
+            $_SERVER['HTTPS'] = 'on';
+        }
+        
+        // إجبار HTTPS إذا كان الموقع في production
+        if (env('APP_ENV') === 'production') {
+            URL::forceScheme('https');
+        }
+        
+        // إعداد إضافي للتأكد من عمل asset() بشكل صحيح
+        if (env('FORCE_HTTPS', false)) {
+            URL::forceScheme('https');
+        }
+        
+        // إعداد خاص للـ Livewire مع Flexible SSL
+        if (class_exists(\Livewire\Livewire::class)) {
+            \Livewire\Livewire::setUpdateRoute(function ($handle) {
+                return \Illuminate\Support\Facades\Route::post('/livewire/update', $handle)
+                    ->middleware(['web']);
+            });
+        }
     }
 }
