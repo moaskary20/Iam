@@ -1,0 +1,189 @@
+/* Safe CSS Styles - مقاوم للـ AdBlocker */
+
+/* إصلاح العناصر المخفية */
+.hidden {
+    display: none !important;
+}
+
+.block {
+    display: block !important;
+}
+
+.flex {
+    display: flex !important;
+}
+
+/* إصلاح الـ sidebar */
+.fi-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background: white;
+    z-index: 50;
+    transition: transform 0.3s ease;
+    border-right: 1px solid #e5e7eb;
+}
+
+.fi-sidebar.is-open {
+    transform: translateX(0);
+}
+
+.fi-sidebar:not(.is-open) {
+    transform: translateX(-100%);
+}
+
+/* إصلاح الـ mobile navigation */
+.fi-topbar-mobile-sidebar-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.fi-topbar-mobile-sidebar-trigger:hover {
+    background-color: #f3f4f6;
+}
+
+/* إصلاح أزرار الجداول */
+.fi-ta-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.fi-ta-action {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.fi-ta-action:hover {
+    background: #2563eb;
+}
+
+.fi-ta-action.danger {
+    background: #ef4444;
+}
+
+.fi-ta-action.danger:hover {
+    background: #dc2626;
+}
+
+/* إصلاح الـ overlay */
+.fi-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+}
+
+/* إصلاح الـ form fields */
+.fi-fo-field {
+    margin-bottom: 16px;
+}
+
+.fi-fo-field-wrp {
+    position: relative;
+}
+
+.fi-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.fi-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* إصلاح الـ notifications */
+.fi-no {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 60;
+    min-width: 300px;
+}
+
+.fi-no.success {
+    border-left: 4px solid #10b981;
+}
+
+.fi-no.error {
+    border-left: 4px solid #ef4444;
+}
+
+.fi-no.warning {
+    border-left: 4px solid #f59e0b;
+}
+
+/* إصلاح الـ loading states */
+.fi-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 50%;
+    border-top-color: #3b82f6;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* إصلاح responsive design */
+@media (max-width: 768px) {
+    .fi-sidebar {
+        width: 100vw;
+    }
+    
+    .fi-main {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 769px) {
+    .fi-sidebar {
+        width: 256px;
+        position: static;
+        transform: translateX(0) !important;
+    }
+    
+    .fi-main {
+        margin-left: 256px;
+    }
+}
+
+/* إخفاء العناصر عند عدم وجود JavaScript */
+.no-js .js-only {
+    display: none !important;
+}
+
+/* تأكيد أن العناصر الهامة ظاهرة */
+.fi-main-content,
+.fi-page,
+.fi-simple-page {
+    opacity: 1 !important;
+    visibility: visible !important;
+}

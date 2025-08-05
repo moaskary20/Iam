@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Livewire Fallback</title>
+</head>
+<body>
+    <script>
+        // Livewire JavaScript fallback - محتوى آمن
+        (function() {
+            'use strict';
+            
+            if (typeof window.Livewire !== 'undefined') {
+                console.log('Livewire already loaded');
+                return;
+            }
+            
+            console.log('Loading Livewire fallback');
+            
+            // Livewire core object
+            window.Livewire = {
+                // Main methods
+                emit: function(event, ...params) {
+                    console.log('Livewire emit:', event, params);
+                    
+                    // إرسال Ajax request بدلاً من Livewire
+                    if (event === 'refreshComponent') {
+                        window.location.reload();
+                    }
+                    
+                    return this;
+                },
+                
+                on: function(event, callback) {
+                    console.log('Livewire on:', event);
+                    
+                    document.addEventListener('livewire:' + event, function(e) {
+                        if (typeof callback === 'function') {
+                            callback(e.detail);
+                        }
+                    });
+                    
+                    return this;
+                },
+                
+                // File upload methods
+                upload: function(name, file, callback) {
+                    console.log('Livewire upload:', name, file);
+                    
+                    const formData = new FormData();
+                    formData.append(name, file);
+                    formData.append('_token', this.getCsrfToken());
+                    
+                    fetch('/livewire/upload-file', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (typeof callback === 'function') {
+                            callback(data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Upload error:', error);
+                        if (typeof callback === 'function') {
+                            callback({ error: error.message });
+                        }
+                    });
+                },
+                
+                // Component methods
+                restart: function() {
+                    console.log('Livewire restart');
+                    window.location.reload();
+                },
+                
+                rescan: function() {
+                    console.log('Livewire rescan');
+                    this.scanForComponents();
+                },
+                
+                // Helper methods
+                getCsrfToken: function() {
+                    const token = document.querySelector('meta[name="csrf-token"]');
+                    return token ? token.getAttribute('content') : '';
+                },
+                
+                scanForComponents: function() {
+                    const components = document.querySelectorAll('[wire\\:id]');
+                    console.log('Found', components.length, 'Livewire components');
+                    
+                    components.forEach(component => {
+                        this.initializeComponent(component);
+                    });
+                },
+                
+                initializeComponent: function(element) {
+                    const wireId = element.getAttribute('wire:id');
+                    console.log('Initializing component:', wireId);
+                    
+                    // إعداد event listeners للـ wire directives
+                    const clickElements = element.querySelectorAll('[wire\\:click]');
+                    clickElements.forEach(el => {
+                        el.addEventListener('click', (e) => {
+                            const action = el.getAttribute('wire:click');
+                            console.log('Wire click:', action);
+                            this.callMethod(wireId, action);
+                        });
+                    });
+                    
+                    const submitForms = element.querySelectorAll('[wire\\:submit]');
+                    submitForms.forEach(form => {
+                        form.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            const action = form.getAttribute('wire:submit');
+                            console.log('Wire submit:', action);
+                            this.callMethod(wireId, action);
+                        });
+                    });
+                },
+                
+                callMethod: function(componentId, method) {
+                    console.log('Calling method:', method, 'on component:', componentId);
+                    
+                    // إرسال Ajax request للـ method
+                    fetch('/livewire/message/' + componentId, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': this.getCsrfToken()
+                        },
+                        body: JSON.stringify({
+                            fingerprint: {
+                                id: componentId,
+                                name: 'unknown',
+                                locale: 'en',
+                                path: window.location.pathname,
+                                method: 'GET'
+                            },
+                            serverMemo: {},
+                            updates: [{
+                                type: 'callMethod',
+                                payload: {
+                                    id: Math.random().toString(36).substr(2, 9),
+                                    method: method,
+                                    params: []
+                                }
+                            }]
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Method response:', data);
+                        if (data.effects && data.effects.html) {
+                            // تحديث DOM
+                            const component = document.querySelector('[wire\\:id="' + componentId + '"]');
+                            if (component) {
+                                component.outerHTML = data.effects.html;
+                                this.scanForComponents();
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Method call error:', error);
+                    });
+                }
+            };
+            
+            // Alpine.js directives fallback
+            window.Alpine = window.Alpine || {
+                data: function(callback) {
+                    return callback;
+                },
+                store: function(name, data) {
+                    window.$store = window.$store || {};
+                    window.$store[name] = data;
+                    console.log('Alpine store created:', name);
+                },
+                start: function() {
+                    console.log('Alpine fallback started');
+                }
+            };
+            
+            // تهيئة عند تحميل الصفحة
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM loaded - initializing Livewire fallback');
+                
+                if (window.Livewire) {
+                    window.Livewire.scanForComponents();
+                }
+                
+                // إرسال event جاهزية
+                const event = new CustomEvent('livewire:load');
+                document.dispatchEvent(event);
+            });
+            
+            console.log('Livewire fallback loaded');
+        })();
+    </script>
+</body>
+</html>
