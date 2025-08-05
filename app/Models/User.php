@@ -409,7 +409,8 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // التحقق من الصلاحيات للوصول للوحة التحكم
-        return $this->hasAnyPermission(['access_admin', 'super_admin']) || $this->isAdmin();
+        // السماح لجميع المستخدمين المفعلين بالوصول للوحة التحكم
+        // يمكن تخصيص هذا لاحقاً حسب الحاجة
+        return $this->is_verified && $this->email_verified_at !== null;
     }
 }
