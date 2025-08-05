@@ -15,7 +15,7 @@ class TrustProxies extends Middleware
      * Simplified - trust local proxies only
      * @var array<int, string>|string|null
      */
-    protected $proxies = null;
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.
@@ -23,12 +23,7 @@ class TrustProxies extends Middleware
      * Standard proxy headers (no Cloudflare specific headers)
      * @var int
      */
-    protected $headers = 
-        Request::HEADER_X_FORWARDED_FOR |
-        Request::HEADER_X_FORWARDED_HOST |
-        Request::HEADER_X_FORWARDED_PORT |
-        Request::HEADER_X_FORWARDED_PROTO |
-        Request::HEADER_X_FORWARDED_AWS_ELB;
+    protected $headers = Request::HEADER_X_FORWARDED_ALL;
 
     /**
      * Handle an incoming request.
