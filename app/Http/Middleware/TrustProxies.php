@@ -67,11 +67,11 @@ class TrustProxies extends Middleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // إجبار HTTPS إذا كان الموقع يعمل خلف Cloudflare (قبل parent::handle)
+        $this->forceHttpsScheme($request);
+        
         // تطبيق إعدادات Trust Proxies من Laravel
         parent::handle($request, $next);
-        
-        // إجبار HTTPS إذا كان الموقع يعمل خلف Cloudflare
-        $this->forceHttpsScheme($request);
         
         // إضافة معلومات إضافية من Cloudflare headers
         $this->addCloudflareInfo($request);
@@ -88,47 +88,46 @@ class TrustProxies extends Middleware
         // مع Cloudflare Flexible SSL، الاتصال بين Cloudflare والسيرفر يكون HTTP
         // لكن Cloudflare يرسل X-Forwarded-Proto: https للإشارة أن المستخدم يستخدم HTTPS
         
-        $forwardedProto = $request->header('X-Forwarded-Proto');
+        $shouldForceHttps = false;
         
-        // إجبار HTTPS إذا كان المستخدم يصل عبر HTTPS (حتى لو السيرفر يستلم HTTP)
+        // فحص X-Forwarded-Proto header
+        $forwardedProto = $request->header('X-Forwarded-Proto');
         if ($forwardedProto === 'https') {
-            $request->server->set('HTTPS', 'on');
-            $request->server->set('SERVER_PORT', 443);
-            $request->server->set('REQUEST_SCHEME', 'https');
-            
-            // إضافة متغيرات إضافية لـ Laravel للتأكد من اكتشاف HTTPS
-            $_SERVER['HTTPS'] = 'on';
-            $_SERVER['SERVER_PORT'] = 443;
-            $_SERVER['REQUEST_SCHEME'] = 'https';
+            $shouldForceHttps = true;
         }
         
-        // التحقق من Cloudflare SSL header (CF-Visitor)
+        // فحص CF-Visitor header من Cloudflare
         $cfVisitor = $request->header('CF-Visitor');
         if ($cfVisitor) {
             $visitor = json_decode($cfVisitor, true);
             if (isset($visitor['scheme']) && $visitor['scheme'] === 'https') {
-                $request->server->set('HTTPS', 'on');
-                $request->server->set('SERVER_PORT', 443);
-                $request->server->set('REQUEST_SCHEME', 'https');
-                
-                // تحديث متغيرات PHP العامة
-                $_SERVER['HTTPS'] = 'on';
-                $_SERVER['SERVER_PORT'] = 443;
-                $_SERVER['REQUEST_SCHEME'] = 'https';
+                $shouldForceHttps = true;
             }
         }
         
         // للتأكد مع Flexible SSL: إذا كان الطلب من Cloudflare واحتوى على CF-Ray
         // نفترض أنه HTTPS (لأن Cloudflare غالباً ما يستخدم HTTPS للمستخدمين)
-        if ($request->header('CF-Ray') && !$request->isSecure()) {
-            // فقط إذا لم يكن Laravel يكتشف HTTPS بالفعل
+        if ($request->header('CF-Ray') && !$shouldForceHttps) {
+            $shouldForceHttps = true;
+        }
+        
+        // تطبيق إعدادات HTTPS إذا كان مطلوب
+        if ($shouldForceHttps) {
+            // تعديل request server variables
             $request->server->set('HTTPS', 'on');
             $request->server->set('SERVER_PORT', 443);
             $request->server->set('REQUEST_SCHEME', 'https');
             
+            // تعديل PHP globals
             $_SERVER['HTTPS'] = 'on';
             $_SERVER['SERVER_PORT'] = 443;
             $_SERVER['REQUEST_SCHEME'] = 'https';
+            
+            // تعديل HTTP_X_FORWARDED_PROTO إذا لم يكن موجود
+            if (!$request->header('X-Forwarded-Proto')) {
+                $request->headers->set('X-Forwarded-Proto', 'https');
+                $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
+            }
         }
     }
     
