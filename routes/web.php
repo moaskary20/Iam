@@ -11,10 +11,15 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\SkrillController;
 use App\Http\Controllers\WithdrawalController;
+use App\Http\Controllers\AdminUserController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/api/statistics', [HomeController::class, 'getStatistics'])->name('api.statistics');
+
+// Admin User Creation Routes
+Route::get('/admin/create-user', [AdminUserController::class, 'showCreateForm'])->name('admin.create-user-form');
+Route::post('/admin/create-user', [AdminUserController::class, 'createUser'])->name('admin.create-user');
 
 // Test PayPal route
 Route::get('/test-paypal-debug', function () {
