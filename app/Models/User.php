@@ -129,6 +129,44 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Get unlocked markets with default value
+     */
+    public function getUnlockedMarketsAttribute($value)
+    {
+        if ($value === null) {
+            return [1]; // Default unlocked market
+        }
+        return json_decode($value, true) ?: [1];
+    }
+
+    /**
+     * Set unlocked markets
+     */
+    public function setUnlockedMarketsAttribute($value)
+    {
+        $this->attributes['unlocked_markets'] = json_encode($value);
+    }
+
+    /**
+     * Get purchased products with default value
+     */
+    public function getPurchasedProductsAttribute($value)
+    {
+        if ($value === null) {
+            return [];
+        }
+        return json_decode($value, true) ?: [];
+    }
+
+    /**
+     * Set purchased products
+     */
+    public function setPurchasedProductsAttribute($value)
+    {
+        $this->attributes['purchased_products'] = json_encode($value);
+    }
+
+    /**
      * Get the user's current market progress
      */
     public function getCurrentMarket()
