@@ -12,10 +12,15 @@ use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\SkrillController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\ServerTestController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/api/statistics', [HomeController::class, 'getStatistics'])->name('api.statistics');
+
+// Server Test Routes
+Route::get('/test-server', [ServerTestController::class, 'showTestPage'])->name('test.server');
+Route::get('/test-upload-api', [ServerTestController::class, 'testUpload'])->name('test.upload.api');
 
 // Admin User Creation Routes
 Route::get('/admin/create-user', [AdminUserController::class, 'showCreateForm'])->name('admin.create-user-form');
