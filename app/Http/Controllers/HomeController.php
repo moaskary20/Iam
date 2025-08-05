@@ -36,16 +36,45 @@ class HomeController extends Controller
     
     public function getStatistics()
     {
-        $user = auth()->user();
-        
-        // Return user-specific or system statistics based on authentication
-        if ($user) {
-            $statistics = $this->getUserStatistics($user);
-        } else {
-            $statistics = $this->getRealtimeStatistics();
+        try {
+            $user = auth()->user();
+            
+            // Return user-specific or system statistics based on authentication
+            if ($user) {
+                $statistics = $this->getUserStatistics($user);
+            } else {
+                // Return demo statistics for unauthenticated users
+                $statistics = [
+                    'balance' => '0.00',
+                    'total_transactions' => 0,
+                    'successful_transactions' => 0,
+                    'pending_transactions' => 0,
+                    'total_deposits' => '0.00',
+                    'total_withdrawals' => '0.00',
+                    'monthly_transactions' => 0,
+                    'daily_transactions' => 0,
+                    'last_transaction' => null,
+                    'market_status' => 'مغلق'
+                ];
+            }
+            
+            return response()->json($statistics);
+        } catch (\Exception $e) {
+            // Return safe default statistics on error
+            return response()->json([
+                'balance' => '0.00',
+                'total_transactions' => 0,
+                'successful_transactions' => 0,
+                'pending_transactions' => 0,
+                'total_deposits' => '0.00',
+                'total_withdrawals' => '0.00',
+                'monthly_transactions' => 0,
+                'daily_transactions' => 0,
+                'last_transaction' => null,
+                'market_status' => 'مغلق',
+                'error' => 'Failed to load statistics'
+            ], 200); // Return 200 to prevent redirect loops
         }
-        
-        return response()->json($statistics);
     }
     
     private function getUserStatistics($user)

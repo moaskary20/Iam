@@ -17,7 +17,9 @@ use App\Http\Controllers\CloudflareTestController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/api/statistics', [HomeController::class, 'getStatistics'])->name('api.statistics');
+Route::get('/api/statistics', [HomeController::class, 'getStatistics'])
+    ->name('api.statistics')
+    ->middleware('web');
 
 // Server Test Routes
 Route::get('/test-server', [ServerTestController::class, 'showTestPage'])->name('test.server');

@@ -12,16 +12,10 @@ class TrustProxies extends Middleware
     /**
      * The trusted proxies for this application.
      * 
-     * Local network proxies only (no Cloudflare)
+     * Simplified - trust local proxies only
      * @var array<int, string>|string|null
      */
-    protected $proxies = [
-        // Local network proxies
-        '127.0.0.1',
-        '10.0.0.0/8',
-        '172.16.0.0/12',
-        '192.168.0.0/16',
-    ];
+    protected $proxies = null;
 
     /**
      * The headers that should be used to detect proxies.

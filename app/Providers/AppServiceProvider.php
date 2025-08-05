@@ -141,22 +141,22 @@ class AppServiceProvider extends ServiceProvider
             $hasDirectSSL = true;
         }
         
-        // فحص X-Forwarded-Proto من Load Balancer
-        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-            $hasDirectSSL = true;
-            URL::forceScheme('https');
-            $_SERVER['HTTPS'] = 'on';
-        }
+        // فحص X-Forwarded-Proto من Load Balancer (معطل مؤقتاً)
+        // if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+        //     $hasDirectSSL = true;
+        //     URL::forceScheme('https');
+        //     $_SERVER['HTTPS'] = 'on';
+        // }
         
-        // إجبار HTTPS في production أو مع Let's Encrypt
-        if (env('APP_ENV') === 'production' || $hasDirectSSL) {
-            URL::forceScheme('https');
-        }
+        // إجبار HTTPS معطل مؤقتاً لحل مشكلة redirect loop
+        // if (env('APP_ENV') === 'production' || $hasDirectSSL) {
+        //     URL::forceScheme('https');
+        // }
         
         // إعداد إضافي للتأكد من عمل asset() بشكل صحيح
-        if (env('FORCE_HTTPS', false)) {
-            URL::forceScheme('https');
-        }
+        // if (env('FORCE_HTTPS', false)) {
+        //     URL::forceScheme('https');
+        // }
         
         // إعداد Livewire للعمل مع Let's Encrypt SSL
         if (class_exists(\Livewire\Livewire::class)) {
