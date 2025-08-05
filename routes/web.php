@@ -16,6 +16,8 @@ use App\Http\Controllers\ServerTestController;
 use App\Http\Controllers\CloudflareTestController;
 use Illuminate\Support\Facades\Auth;
 
+use App\Http\Controllers\AdminLoginController;
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/api/statistics', [HomeController::class, 'getStatistics'])
     ->name('api.statistics')
@@ -194,6 +196,10 @@ Route::post('/withdrawal/request', [WithdrawalController::class, 'store'])->midd
 Route::get('/deposit', function () {
     return view('deposit');
 })->middleware('auth')->name('deposit');
+
+// Admin Login Routes
+Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login.form');
+Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.post');
 
 
 
