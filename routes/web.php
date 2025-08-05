@@ -115,11 +115,11 @@ Route::post('/profile/update', [ProfileController::class, 'update'])->middleware
 // Statistics Route
 Route::get('/statistics', [StatisticsController::class, 'index'])->middleware('auth')->name('statistics');
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('web');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('web');
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register')->middleware('web');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post')->middleware('web');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('web');
 
 Route::get('/wallet', function () {
     $user = auth()->user();
