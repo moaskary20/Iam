@@ -23,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
         // إعدادات Let's Encrypt SSL (بدون Cloudflare)
         $this->configureLetSEncryptSSL();
         
+        // إعداد Alpine.js fixes
+        $this->setupAlpineJsFixes();
+        
         // حل مؤقت لمشكلة array offset errors في Livewire
         error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
         
@@ -176,5 +179,28 @@ class AppServiceProvider extends ServiceProvider
                 'session.http_only' => true
             ]);
         }
+    }
+    
+    /**
+     * إعداد Alpine.js fixes
+     */
+    protected function setupAlpineJsFixes(): void
+    {
+        // إضافة Alpine.js initialization script إلى جميع الصفحات
+        \View::composer('*', function ($view) {
+            // التأكد من أن هذا view يحتاج Alpine.js
+            $viewName = $view->getName();
+            
+            // إضافة Alpine.js init script للصفحات التي تحتاجه
+            if (str_contains($viewName, 'filament') || 
+                str_contains($viewName, 'admin') || 
+                str_contains($viewName, 'livewire')) {
+                
+                $view->with('needsAlpineInit', true);
+            }
+        });
+        
+        // إضافة Alpine.js component تلقائياً
+        \Blade::component('alpine-init', \Illuminate\View\AnonymousComponent::class);
     }
 }
