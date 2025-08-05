@@ -71,32 +71,35 @@ class TrustProxies extends Middleware
         $this->forceHttpsScheme($request);
         
         // تطبيق إعدادات Trust Proxies من Laravel
-        parent::handle($request, $next);
+        $response = parent::handle($request, $next);
         
         // إضافة معلومات إضافية من Cloudflare headers
         $this->addCloudflareInfo($request);
         
-        return $next($request);
+        return $response;
     }
     
     /**
      * إجبار HTTPS scheme باستخدام X-Forwarded-Proto header
-     * محدث للعمل مع Cloudflare Flexible SSL
+     * محدث للعمل مع Cloudflare + Let's Encrypt
      */
     protected function forceHttpsScheme(Request $request): void
     {
-        // مع Cloudflare Flexible SSL، الاتصال بين Cloudflare والسيرفر يكون HTTP
-        // لكن Cloudflare يرسل X-Forwarded-Proto: https للإشارة أن المستخدم يستخدم HTTPS
-        
         $shouldForceHttps = false;
         
-        // فحص X-Forwarded-Proto header
+        // أولوية الفحص:
+        // 1. Let's Encrypt SSL الأصلي (إذا كان الاتصال مباشر بـ HTTPS)
+        if ($request->isSecure()) {
+            return; // الاتصال آمن بالفعل
+        }
+        
+        // 2. فحص X-Forwarded-Proto header من Cloudflare أو Load Balancer
         $forwardedProto = $request->header('X-Forwarded-Proto');
         if ($forwardedProto === 'https') {
             $shouldForceHttps = true;
         }
         
-        // فحص CF-Visitor header من Cloudflare
+        // 3. فحص CF-Visitor header من Cloudflare
         $cfVisitor = $request->header('CF-Visitor');
         if ($cfVisitor) {
             $visitor = json_decode($cfVisitor, true);
@@ -105,9 +108,13 @@ class TrustProxies extends Middleware
             }
         }
         
-        // للتأكد مع Flexible SSL: إذا كان الطلب من Cloudflare واحتوى على CF-Ray
-        // نفترض أنه HTTPS (لأن Cloudflare غالباً ما يستخدم HTTPS للمستخدمين)
-        if ($request->header('CF-Ray') && !$shouldForceHttps) {
+        // 4. فحص إعدادات البيئة للإجبار
+        if (env('FORCE_HTTPS', false) || env('APP_ENV') === 'production') {
+            $shouldForceHttps = true;
+        }
+        
+        // 5. للتأكد مع Cloudflare: إذا كان الطلب من Cloudflare واحتوى على CF-Ray
+        if ($request->header('CF-Ray')) {
             $shouldForceHttps = true;
         }
         

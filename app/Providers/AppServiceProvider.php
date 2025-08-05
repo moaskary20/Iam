@@ -129,8 +129,21 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureCloudflareFlexibleSSL(): void
     {
-        // مع Flexible SSL، Cloudflare يتصل بالسيرفر عبر HTTP
-        // لكن المستخدمين يصلون عبر HTTPS
+        // مع Let's Encrypt + Cloudflare، نحتاج إعدادات مختلفة
+        // عن Flexible SSL فقط
+        
+        $hasLetEncryptSSL = false;
+        $hasCloudflareSSL = false;
+        
+        // فحص وجود Let's Encrypt SSL مباشرة
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            $hasLetEncryptSSL = true;
+        }
+        
+        // فحص وجود Cloudflare
+        if (isset($_SERVER['HTTP_CF_RAY']) || isset($_SERVER['HTTP_CF_VISITOR'])) {
+            $hasCloudflareSSL = true;
+        }
         
         // إجبار HTTPS للـ URLs في حالة وجود X-Forwarded-Proto
         if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
@@ -138,8 +151,8 @@ class AppServiceProvider extends ServiceProvider
             $_SERVER['HTTPS'] = 'on';
         }
         
-        // إجبار HTTPS إذا كان الموقع في production
-        if (env('APP_ENV') === 'production') {
+        // إجبار HTTPS إذا كان الموقع في production أو لديه Let's Encrypt
+        if (env('APP_ENV') === 'production' || $hasLetEncryptSSL) {
             URL::forceScheme('https');
         }
         
@@ -148,12 +161,26 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
         
-        // إعداد خاص للـ Livewire مع Flexible SSL
+        // إعداد خاص للـ Livewire مع SSL (Let's Encrypt أو Cloudflare)
         if (class_exists(\Livewire\Livewire::class)) {
+            // إعداد Livewire للعمل مع SSL بشكل صحيح
             \Livewire\Livewire::setUpdateRoute(function ($handle) {
                 return \Illuminate\Support\Facades\Route::post('/livewire/update', $handle)
                     ->middleware(['web']);
             });
+            
+            // إعداد asset URL للـ Livewire
+            if ($hasLetEncryptSSL || $hasCloudflareSSL || env('FORCE_HTTPS', false)) {
+                config(['livewire.asset_url' => null]); // استخدام الـ URL الافتراضي مع HTTPS
+            }
+        }
+        
+        // إعداد session cookies للعمل مع HTTPS
+        if ($hasLetEncryptSSL || env('FORCE_HTTPS', false)) {
+            config([
+                'session.secure' => true,
+                'session.same_site' => 'lax'
+            ]);
         }
     }
 }
