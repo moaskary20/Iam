@@ -132,53 +132,25 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureLetSEncryptSSL(): void
     {
-        // إعدادات Let's Encrypt SSL فقط (بدون Cloudflare)
+        // تعطيل كامل لـ SSL forcing لحل مشكلة redirect loop
         
-        $hasDirectSSL = false;
-        
-        // فحص وجود Let's Encrypt SSL مباشرة
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-            $hasDirectSSL = true;
-        }
-        
-        // فحص X-Forwarded-Proto من Load Balancer (معطل مؤقتاً)
-        // if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-        //     $hasDirectSSL = true;
-        //     URL::forceScheme('https');
-        //     $_SERVER['HTTPS'] = 'on';
-        // }
-        
-        // إجبار HTTPS معطل مؤقتاً لحل مشكلة redirect loop
-        // if (env('APP_ENV') === 'production' || $hasDirectSSL) {
-        //     URL::forceScheme('https');
-        // }
-        
-        // إعداد إضافي للتأكد من عمل asset() بشكل صحيح
-        // if (env('FORCE_HTTPS', false)) {
-        //     URL::forceScheme('https');
-        // }
-        
-        // إعداد Livewire للعمل مع Let's Encrypt SSL
+        // إعداد Livewire بدون SSL requirements
         if (class_exists(\Livewire\Livewire::class)) {
             \Livewire\Livewire::setUpdateRoute(function ($handle) {
                 return \Illuminate\Support\Facades\Route::post('/livewire/update', $handle)
                     ->middleware(['web']);
             });
             
-            // مع Let's Encrypt، استخدم الـ asset URL الافتراضي
-            if ($hasDirectSSL) {
-                config(['livewire.asset_url' => null]);
-            }
+            // استخدم HTTP للـ asset URL
+            config(['livewire.asset_url' => null]);
         }
         
-        // إعداد session cookies للعمل مع SSL
-        if ($hasDirectSSL || env('FORCE_HTTPS', false)) {
-            config([
-                'session.secure' => true,
-                'session.same_site' => 'lax',
-                'session.http_only' => true
-            ]);
-        }
+        // إعداد session cookies بدون SSL requirement
+        config([
+            'session.secure' => false,
+            'session.same_site' => 'lax',
+            'session.http_only' => true
+        ]);
     }
     
     /**

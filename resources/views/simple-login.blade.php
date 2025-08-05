@@ -89,18 +89,20 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('simple.login.post') }}">
+                <form method="POST" action="{{ route('login.simple.post') }}">
+            @csrf
+            
             <div class="form-group">
-                <label for="email">البريد الإلكتروني:</label>
-                <input type="email" id="email" name="email" value="{{ old('email', 'mo.askary@gmail.com') }}" required>
+                <label for="email">البريد الإلكتروني</label>
+                <input type="email" id="email" name="email" required autofocus value="{{ old('email') }}">
             </div>
-
+            
             <div class="form-group">
-                <label for="password">كلمة المرور:</label>
-                <input type="password" id="password" name="password" value="password" required>
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" name="password" required>
             </div>
-
-            <button type="submit">دخول</button>
+            
+            <button type="submit" class="login-btn">تسجيل الدخول</button>
         </form>
         
         <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">

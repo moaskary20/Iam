@@ -21,6 +21,11 @@ Route::get('/api/statistics', [HomeController::class, 'getStatistics'])
     ->name('api.statistics')
     ->middleware('web');
 
+// Simple Login Routes (بديل لـ Filament Login)
+Route::get('/login-simple', [App\Http\Controllers\SimpleLoginController::class, 'showLoginForm'])->name('login.simple');
+Route::post('/login-simple', [App\Http\Controllers\SimpleLoginController::class, 'login'])->name('login.simple.post');
+Route::post('/logout-simple', [App\Http\Controllers\SimpleLoginController::class, 'logout'])->name('logout.simple');
+
 // Server Test Routes
 Route::get('/test-server', [ServerTestController::class, 'showTestPage'])->name('test.server');
 Route::get('/test-upload-api', [ServerTestController::class, 'testUpload'])->name('test.upload.api');

@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // إضافة حقول الرصيد الإضافية فقط (balance موجود بالفعل)
+            // إضافة عمود balance إذا لم يكن موجود
+            if (!Schema::hasColumn('users', 'balance')) {
+                $table->decimal('balance', 10, 2)->default(0.00)->after('remember_token');
+            }
+            
+            // إضافة حقول الرصيد الإضافية
             if (!Schema::hasColumn('users', 'balance_visible')) {
                 $table->boolean('balance_visible')->default(true)->after('balance');
             }
