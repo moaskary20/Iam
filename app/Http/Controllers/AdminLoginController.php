@@ -17,7 +17,7 @@ class AdminLoginController extends Controller
         $credentials = $request->only('email', 'password');
         // يمكنك تخصيص الحارس (guard) إذا كان لديك حارس خاص بالأدمن
         if (Auth::attempt($credentials)) {
-            return redirect()->intended('/admin/dashboard');
+            return redirect()->intended('/login');
         }
         return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة'])->withInput();
     }
