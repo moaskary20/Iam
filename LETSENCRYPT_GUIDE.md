@@ -1,46 +1,42 @@
-# حل مشاكل Let's Encrypt + Cloudflare Full SSL + Laravel
+# حل مشاكل Let's Encrypt مع Laravel (بدون Cloudflare)
 
-## المشكلة المحدثة
-بعد تثبيت Let's Encrypt على السيرفر وتغيير Cloudflare إلى "Full SSL"، لا تزال مشاكل Livewire وأخطاء Alpine.js Expression Errors موجودة.
+## المشكلة
+بعد تثبيت Let's Encrypt على السيرفر، ظهرت مشاكل في Livewire وأخطاء Alpine.js Expression Errors.
 
 ## السبب
-مع Cloudflare Full SSL، التكوين مختلف عن Flexible:
-- User → Cloudflare: HTTPS
-- Cloudflare → Server: HTTPS (Let's Encrypt)
-- Laravel يحتاج إعدادات مختلفة للتعامل مع Full SSL
+مشاكل في إعدادات SSL مع Laravel:
+- Laravel لا يكتشف SSL بشكل صحيح
+- مشاكل في إعدادات Livewire مع HTTPS
+- Alpine.js expression errors في Filament
 
-## الحل المحدث للـ Full SSL
+## الحل البسيط (Let's Encrypt فقط)
 
-### 1. إعداد Cloudflare SSL Mode
-في لوحة تحكم Cloudflare:
-```
-SSL/TLS → Overview → SSL/TLS encryption mode
-تأكد من أنه "Full (strict)" وليس "Flexible"
-```
-
-### 2. الملفات المحدثة للـ Full SSL
+### 1. الملفات المحدثة
 
 #### TrustProxies.php
-- إعداد خاص للكشف عن Cloudflare Full SSL
-- التعامل مع HTTPS المباشر من Let's Encrypt
-- إعطاء أولوية للـ SSL الأصلي
+- إعدادات محلية فقط (local network proxies)
+- كشف Let's Encrypt SSL المباشر
+- إعدادات X-Forwarded-Proto للـ Load Balancers
 
-#### AppServiceProvider.php (configureCloudflareFullSSL)
-- إعدادات مختلطة Full SSL + Let's Encrypt
-- session cookies مع Full SSL
-- Livewire configuration للـ Full SSL
+#### AppServiceProvider.php (configureLetSEncryptSSL)
+- إعدادات Let's Encrypt مباشرة
+- session cookies مع SSL
+- Livewire configuration للـ SSL
 
-#### FixAlpineJsErrors.php (جديد)
+#### FixLivewireSSL.php
+- إصلاح مشاكل Livewire مع Let's Encrypt
+- إعدادات HTTPS للـ Livewire requests
+
+#### FixAlpineJsErrors.php
 - middleware متخصص لحل مشاكل Alpine.js
 - JavaScript injection لحل Expression Errors
-- إعداد Alpine.js store defaults
 
-### 3. خطوات النشر المحدثة
+### 2. خطوات النشر
 
 #### أ. على السيرفر المحلي:
 ```bash
 git add .
-git commit -m "🔧 إصلاح مشاكل Cloudflare Full SSL + Alpine.js"
+git commit -m "🔧 إزالة إعدادات Cloudflare - Let's Encrypt فقط"
 git push origin main
 ```
 
@@ -52,13 +48,11 @@ chmod +x deploy-letsencrypt.sh
 sudo ./deploy-letsencrypt.sh
 ```
 
-### 4. إعداد .env للـ Full SSL
+### 3. إعداد .env للـ Let's Encrypt فقط
 ```env
 APP_URL=https://yourdomain.com
 APP_ENV=production
 FORCE_HTTPS=true
-CLOUDFLARE_ENABLED=true
-CLOUDFLARE_SSL_MODE=full
 SESSION_SECURE_COOKIES=true
 ```
 

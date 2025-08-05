@@ -12,37 +12,11 @@ class TrustProxies extends Middleware
     /**
      * The trusted proxies for this application.
      * 
-     * قائمة Cloudflare IP ranges لجعل Laravel يثق بها
+     * Local network proxies only (no Cloudflare)
      * @var array<int, string>|string|null
      */
     protected $proxies = [
-        // Cloudflare IPv4 ranges
-        '103.21.244.0/22',
-        '103.22.200.0/22',
-        '103.31.4.0/22',
-        '104.16.0.0/13',
-        '104.24.0.0/14',
-        '108.162.192.0/18',
-        '131.0.72.0/22',
-        '141.101.64.0/18',
-        '162.158.0.0/15',
-        '172.64.0.0/13',
-        '173.245.48.0/20',
-        '188.114.96.0/20',
-        '190.93.240.0/20',
-        '197.234.240.0/22',
-        '198.41.128.0/17',
-        
-        // Cloudflare IPv6 ranges
-        '2400:cb00::/32',
-        '2606:4700::/32',
-        '2803:f800::/32',
-        '2405:b500::/32',
-        '2405:8100::/32',
-        '2a06:98c0::/29',
-        '2c0f:f248::/32',
-        
-        // Other common proxies
+        // Local network proxies
         '127.0.0.1',
         '10.0.0.0/8',
         '172.16.0.0/12',
@@ -52,7 +26,7 @@ class TrustProxies extends Middleware
     /**
      * The headers that should be used to detect proxies.
      * 
-     * Headers اللي هنستخدمها لاكتشاف المعلومات الصحيحة من Cloudflare
+     * Standard proxy headers (no Cloudflare specific headers)
      * @var int
      */
     protected $headers = 
@@ -81,45 +55,26 @@ class TrustProxies extends Middleware
     
     /**
      * إجبار HTTPS scheme باستخدام X-Forwarded-Proto header
-     * محدث للعمل مع Cloudflare Full SSL + Let's Encrypt
+     * محدث للعمل مع Let's Encrypt فقط (بدون Cloudflare)
      */
     protected function forceHttpsScheme(Request $request): void
     {
         $shouldForceHttps = false;
         
-        // مع Cloudflare Full SSL، التصحيح مختلف:
-        // 1. Cloudflare → User: HTTPS
-        // 2. Cloudflare → Server: HTTPS (مع Let's Encrypt)
-        // 3. Laravel يجب أن يكتشف HTTPS بشكل صحيح
-        
-        // أولاً: فحص إذا كان SSL أصلي (Let's Encrypt)
+        // مع Let's Encrypt المباشر:
+        // 1. فحص إذا كان SSL أصلي (Let's Encrypt) موجود
         if ($request->isSecure() && $request->getScheme() === 'https') {
             // الاتصال آمن بالفعل، لا حاجة لتعديل
             return;
         }
         
-        // ثانياً: فحص headers من Cloudflare Full SSL
+        // 2. فحص X-Forwarded-Proto header من Load Balancer أو Proxy
         $forwardedProto = $request->header('X-Forwarded-Proto');
         if ($forwardedProto === 'https') {
             $shouldForceHttps = true;
         }
         
-        // ثالثاً: فحص CF-Visitor header
-        $cfVisitor = $request->header('CF-Visitor');
-        if ($cfVisitor) {
-            $visitor = json_decode($cfVisitor, true);
-            if (isset($visitor['scheme']) && $visitor['scheme'] === 'https') {
-                $shouldForceHttps = true;
-            }
-        }
-        
-        // رابعاً: إذا كان من Cloudflare ولديه Let's Encrypt، افترض HTTPS
-        if ($request->header('CF-Ray') && !$shouldForceHttps) {
-            // مع Full SSL، Cloudflare يتصل بالسيرفر عبر HTTPS
-            $shouldForceHttps = true;
-        }
-        
-        // خامساً: إعدادات البيئة
+        // 3. إعدادات البيئة للإجبار
         if (env('FORCE_HTTPS', false) || env('APP_ENV') === 'production') {
             $shouldForceHttps = true;
         }
@@ -142,21 +97,11 @@ class TrustProxies extends Middleware
     }
     
     /**
-     * إضافة معلومات Cloudflare للـ request
+     * إضافة معلومات إضافية للـ request (بدون Cloudflare)
      */
     protected function addCloudflareInfo(Request $request): void
     {
-        // إضافة معلومات Cloudflare للـ request attributes
-        if ($request->header('CF-Ray')) {
-            $request->attributes->set('cloudflare_ray', $request->header('CF-Ray'));
-        }
-        
-        if ($request->header('CF-IPCountry')) {
-            $request->attributes->set('visitor_country', $request->header('CF-IPCountry'));
-        }
-        
-        if ($request->header('CF-Connecting-IP')) {
-            $request->attributes->set('real_ip', $request->header('CF-Connecting-IP'));
-        }
+        // لا حاجة لمعلومات Cloudflare بعد الآن
+        // يمكن إضافة معلومات أخرى هنا إذا لزم الأمر
     }
 }

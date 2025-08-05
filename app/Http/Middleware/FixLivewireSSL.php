@@ -11,42 +11,38 @@ class FixLivewireSSL
     /**
      * Handle an incoming request.
      * 
-     * هذا الـ middleware يحل مشاكل Livewire مع Cloudflare Full SSL
+     * هذا الـ middleware يحل مشاكل Livewire مع Let's Encrypt SSL
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // إصلاح مشاكل Livewire مع Cloudflare Full SSL
-        $this->fixCloudflareFullSSL($request);
+        // إصلاح مشاكل Livewire مع Let's Encrypt
+        $this->fixLetsEncryptSSL($request);
         
         // إصلاح مشاكل Alpine.js expressions
         $this->setupAlpineJsEnvironment();
         
         $response = $next($request);
         
-        // إضافة headers للـ response لحل مشاكل CORS أو Mixed Content
+        // إضافة headers للـ response لحل مشاكل Mixed Content
         $this->addSecurityHeaders($response);
         
         return $response;
     }
     
     /**
-     * إصلاح مشاكل Livewire مع Cloudflare Full SSL
+     * إصلاح مشاكل Livewire مع Let's Encrypt SSL
      */
-    protected function fixCloudflareFullSSL(Request $request): void
+    protected function fixLetsEncryptSSL(Request $request): void
     {
-        // إذا كان هناك Livewire request، تأكد من إعدادات Full SSL الصحيحة
+        // إذا كان هناك Livewire request، تأكد من إعدادات Let's Encrypt الصحيحة
         if ($request->header('X-Livewire')) {
             
-            // مع Cloudflare Full SSL، Cloudflare يتصل بالسيرفر عبر HTTPS
-            // لذلك Laravel يجب أن يرى الاتصال كـ HTTPS
-            
-            // فحص وجود CF headers
-            $hasCFRay = $request->header('CF-Ray');
-            $cfVisitor = $request->header('CF-Visitor');
+            // مع Let's Encrypt، التحقق من SSL مباشر
             $forwardedProto = $request->header('X-Forwarded-Proto');
+            $isDirectSSL = $request->isSecure();
             
-            if ($hasCFRay || $cfVisitor || $forwardedProto === 'https') {
-                // إعداد الـ scheme بشكل صحيح للـ Full SSL
+            if ($forwardedProto === 'https' || $isDirectSSL || env('FORCE_HTTPS', false)) {
+                // إعداد الـ scheme بشكل صحيح للـ Let's Encrypt
                 if (!$request->isSecure()) {
                     $request->server->set('HTTPS', 'on');
                     $request->server->set('SERVER_PORT', 443);

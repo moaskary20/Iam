@@ -20,8 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // إعدادات Cloudflare Full SSL + Let's Encrypt
-        $this->configureCloudflareFullSSL();
+        // إعدادات Let's Encrypt SSL (بدون Cloudflare)
+        $this->configureLetSEncryptSSL();
         
         // حل مؤقت لمشكلة array offset errors في Livewire
         error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
@@ -127,14 +127,10 @@ class AppServiceProvider extends ServiceProvider
     /**
      * إعداد Cloudflare Flexible SSL
      */
-    protected function configureCloudflareFullSSL(): void
+    protected function configureLetSEncryptSSL(): void
     {
-        // مع Cloudflare Full SSL + Let's Encrypt:
-        // - User → Cloudflare: HTTPS
-        // - Cloudflare → Server: HTTPS (Let's Encrypt)
-        // - Laravel يحتاج إعدادات مختلفة عن Flexible SSL
+        // إعدادات Let's Encrypt SSL فقط (بدون Cloudflare)
         
-        $hasCloudflareFullSSL = false;
         $hasDirectSSL = false;
         
         // فحص وجود Let's Encrypt SSL مباشرة
@@ -142,18 +138,15 @@ class AppServiceProvider extends ServiceProvider
             $hasDirectSSL = true;
         }
         
-        // فحص وجود Cloudflare مع Full SSL
-        if (isset($_SERVER['HTTP_CF_RAY'])) {
-            $hasCloudflareFullSSL = true;
-            
-            // مع Full SSL، Cloudflare يرسل X-Forwarded-Proto: https
-            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-                $hasDirectSSL = true; // نعامله كـ SSL مباشر
-            }
+        // فحص X-Forwarded-Proto من Load Balancer
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $hasDirectSSL = true;
+            URL::forceScheme('https');
+            $_SERVER['HTTPS'] = 'on';
         }
         
-        // إجبار HTTPS للـ URLs
-        if ($hasDirectSSL || $hasCloudflareFullSSL || env('APP_ENV') === 'production') {
+        // إجبار HTTPS في production أو مع Let's Encrypt
+        if (env('APP_ENV') === 'production' || $hasDirectSSL) {
             URL::forceScheme('https');
         }
         
@@ -162,34 +155,26 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
         
-        // إعداد Livewire للعمل مع Full SSL
+        // إعداد Livewire للعمل مع Let's Encrypt SSL
         if (class_exists(\Livewire\Livewire::class)) {
             \Livewire\Livewire::setUpdateRoute(function ($handle) {
                 return \Illuminate\Support\Facades\Route::post('/livewire/update', $handle)
                     ->middleware(['web']);
             });
             
-            // مع Full SSL، نستطيع استخدام الـ asset URL الافتراضي
-            if ($hasDirectSSL || $hasCloudflareFullSSL) {
+            // مع Let's Encrypt، استخدم الـ asset URL الافتراضي
+            if ($hasDirectSSL) {
                 config(['livewire.asset_url' => null]);
             }
         }
         
-        // إعداد session cookies للعمل مع Full SSL
+        // إعداد session cookies للعمل مع SSL
         if ($hasDirectSSL || env('FORCE_HTTPS', false)) {
             config([
                 'session.secure' => true,
                 'session.same_site' => 'lax',
                 'session.http_only' => true
             ]);
-        }
-        
-        // إعداد خاص لـ Alpine.js مع Cloudflare Full SSL
-        if ($hasCloudflareFullSSL) {
-            // تجنب مشاكل Mixed Content
-            if (!isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-                $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
-            }
         }
     }
 }

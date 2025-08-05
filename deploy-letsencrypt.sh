@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# سكريبت نشر Laravel مع Let's Encrypt + Cloudflare
+# سكريبت نشر Laravel مع Let's Encrypt فقط (بدون Cloudflare)
 # استخدم هذا السكريبت بعد تثبيت Certbot وإنشاء شهادة Let's Encrypt
 
 echo "🚀 بدء عملية النشر مع Let's Encrypt..."
@@ -85,32 +85,6 @@ server {
     ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
     ssl_prefer_server_ciphers off;
     
-    # إعدادات خاصة بـ Cloudflare
-    # الحصول على IP الحقيقي من Cloudflare
-    set_real_ip_from 103.21.244.0/22;
-    set_real_ip_from 103.22.200.0/22;
-    set_real_ip_from 103.31.4.0/22;
-    set_real_ip_from 104.16.0.0/13;
-    set_real_ip_from 104.24.0.0/14;
-    set_real_ip_from 108.162.192.0/18;
-    set_real_ip_from 131.0.72.0/22;
-    set_real_ip_from 141.101.64.0/18;
-    set_real_ip_from 162.158.0.0/15;
-    set_real_ip_from 172.64.0.0/13;
-    set_real_ip_from 173.245.48.0/20;
-    set_real_ip_from 188.114.96.0/20;
-    set_real_ip_from 190.93.240.0/20;
-    set_real_ip_from 197.234.240.0/22;
-    set_real_ip_from 198.41.128.0/17;
-    set_real_ip_from 2400:cb00::/32;
-    set_real_ip_from 2606:4700::/32;
-    set_real_ip_from 2803:f800::/32;
-    set_real_ip_from 2405:b500::/32;
-    set_real_ip_from 2405:8100::/32;
-    set_real_ip_from 2a06:98c0::/29;
-    set_real_ip_from 2c0f:f248::/32;
-    real_ip_header CF-Connecting-IP;
-
     # إعدادات أمان
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Frame-Options DENY always;
@@ -127,7 +101,7 @@ server {
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
         
-        # إعدادات خاصة بـ Livewire
+        # إعدادات خاصة بـ Let's Encrypt SSL
         fastcgi_param HTTPS on;
         fastcgi_param SERVER_PORT 443;
         fastcgi_param REQUEST_SCHEME https;
@@ -162,8 +136,7 @@ echo ""
 echo "📋 الخطوات التالية:"
 echo "1. تحديث yourdomain.com في ملف Nginx إلى النطاق الفعلي"
 echo "2. تحديث APP_URL في ملف .env"
-echo "3. في Cloudflare، تأكد من إعداد SSL/TLS إلى 'Full (strict)' بدلاً من 'Flexible'"
-echo "4. اختبار رفع الملفات في Filament"
+echo "3. اختبار رفع الملفات في Filament"
 echo ""
 echo "🔗 روابط مفيدة:"
 echo "- إدارة Filament: https://yourdomain.com/admin"
