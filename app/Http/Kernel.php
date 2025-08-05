@@ -28,6 +28,7 @@ class Kernel extends HttpKernel
             \Illuminate\Session\Middleware\StartSession::class,
             // ...
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\FixLivewireUpload::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
@@ -46,6 +47,7 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'verified' => \App\Http\Middleware\EnsureUserVerified::class,
+        'livewire.upload' => \App\Http\Middleware\LivewireUploadMiddleware::class,
         // ...
     ];
 }
