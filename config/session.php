@@ -3,7 +3,7 @@
 use Illuminate\Support\Str;
 
 return [
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('SESSION_DRIVER', 'file'),
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
     'encrypt' => env('SESSION_ENCRYPT', false),
@@ -15,10 +15,8 @@ return [
     'cookie' => env('SESSION_COOKIE', Str::snake((string) env('APP_NAME', 'laravel')).'_session'),
     'path' => env('SESSION_PATH', '/'),
     'domain' => env('SESSION_DOMAIN', null),
-    'secure' => false,
-    'http_only' => false,
-    'same_site' => null,
+    'secure' => env('SESSION_SECURE_COOKIE', true),
+    'http_only' => env('SESSION_HTTP_ONLY', true),
+    'same_site' => env('SESSION_SAME_SITE', 'none'),
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
-
-// ...باقي التعليقات الافتراضية من Laravel...
 ];
