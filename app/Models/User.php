@@ -10,6 +10,8 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements FilamentUser
 {
+    use HasFactory, Notifiable;
+
     public function walletTransactions()
     {
         return $this->hasManyThrough(
@@ -27,7 +29,6 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(\App\Models\Wallet::class);
     }
     
-    // إضافة دوال للحصول على بيانات المحفظة
     public function getBalanceAttribute()
     {
         return $this->wallet ? $this->wallet->balance : 0;
@@ -42,10 +43,8 @@ class User extends Authenticatable implements FilamentUser
     
     public function getMarketStatusAttribute()
     {
-        return 'مفتوح'; // يمكن تخصيصها حسب النظام
+        return 'مفتوح';
     }
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
 
     protected static function boot()
     {
@@ -58,17 +57,15 @@ class User extends Authenticatable implements FilamentUser
                 $user->invite_code = $code;
             }
             
-            // تعيين name تلقائياً إذا لم يكن موجود
             if (empty($user->name)) {
                 $user->name = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
                 if (empty($user->name)) {
-                    $user->name = $user->email; // كحل احتياطي
+                    $user->name = $user->email;
                 }
             }
         });
         
         static::updating(function ($user) {
-            // تحديث name عند تحديث first_name أو last_name
             if ($user->isDirty(['first_name', 'last_name']) && empty($user->name)) {
                 $user->name = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
                 if (empty($user->name)) {
@@ -77,11 +74,7 @@ class User extends Authenticatable implements FilamentUser
             }
         });
     }
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -103,21 +96,11 @@ class User extends Authenticatable implements FilamentUser
         'balance',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -128,28 +111,19 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    /**
-     * Get unlocked markets with default value
-     */
     public function getUnlockedMarketsAttribute($value)
     {
         if ($value === null) {
-            return [1]; // Default unlocked market
+            return [1];
         }
         return json_decode($value, true) ?: [1];
     }
 
-    /**
-     * Set unlocked markets
-     */
     public function setUnlockedMarketsAttribute($value)
     {
         $this->attributes['unlocked_markets'] = json_encode($value);
     }
 
-    /**
-     * Get purchased products with default value
-     */
     public function getPurchasedProductsAttribute($value)
     {
         if ($value === null) {
@@ -158,41 +132,26 @@ class User extends Authenticatable implements FilamentUser
         return json_decode($value, true) ?: [];
     }
 
-    /**
-     * Set purchased products
-     */
     public function setPurchasedProductsAttribute($value)
     {
         $this->attributes['purchased_products'] = json_encode($value);
     }
 
-    /**
-     * Get the user's current market progress
-     */
     public function getCurrentMarket()
     {
         return \App\Models\Market::find($this->current_market_id);
     }
 
-    /**
-     * Check if user can access a market
-     */
     public function canAccessMarket($marketId)
     {
         return in_array($marketId, $this->unlocked_markets ?? [1]);
     }
 
-    /**
-     * Check if user has purchased a product
-     */
     public function hasPurchased($productId)
     {
         return in_array($productId, $this->purchased_products ?? []);
     }
 
-    /**
-     * Purchase a product and unlock next
-     */
     public function purchaseProduct($productId)
     {
         $purchasedProducts = $this->purchased_products ?? [];
@@ -201,11 +160,9 @@ class User extends Authenticatable implements FilamentUser
             $purchasedProducts[] = $productId;
             $this->purchased_products = $purchasedProducts;
             
-            // Get current market products
             $currentMarket = $this->getCurrentMarket();
             $marketProducts = $currentMarket->products()->orderBy('id')->get();
             
-            // Check if all products in current market are purchased
             $allPurchased = true;
             foreach ($marketProducts as $product) {
                 if (!in_array($product->id, $purchasedProducts)) {
@@ -214,7 +171,6 @@ class User extends Authenticatable implements FilamentUser
                 }
             }
             
-            // If all products purchased, unlock next market
             if ($allPurchased) {
                 $unlockedMarkets = $this->unlocked_markets ?? [1];
                 $nextMarketId = $this->current_market_id + 1;
@@ -226,7 +182,6 @@ class User extends Authenticatable implements FilamentUser
                     $this->current_product_index = 0;
                 }
             } else {
-                // Move to next product in current market
                 $this->current_product_index++;
             }
             
@@ -239,31 +194,18 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Withdrawal::class);
     }
 
-    // ========================================
-    // Roles & Permissions Relations
-    // ========================================
-
-    /**
-     * العلاقة مع الأدوار
-     */
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles')
             ->withTimestamps();
     }
 
-    /**
-     * العلاقة مع الصلاحيات المباشرة
-     */
     public function permissions()
     {
         return $this->belongsToMany(Permission::class, 'user_permissions')
             ->withTimestamps();
     }
 
-    /**
-     * التحقق من وجود دور معين
-     */
     public function hasRole(string $role): bool
     {
         return $this->roles()
@@ -272,9 +214,6 @@ class User extends Authenticatable implements FilamentUser
             ->exists();
     }
 
-    /**
-     * التحقق من وجود أي من الأدوار المحددة
-     */
     public function hasAnyRole(array $roles): bool
     {
         return $this->roles()
@@ -283,9 +222,6 @@ class User extends Authenticatable implements FilamentUser
             ->exists();
     }
 
-    /**
-     * التحقق من وجود جميع الأدوار المحددة
-     */
     public function hasAllRoles(array $roles): bool
     {
         return $this->roles()
@@ -294,9 +230,6 @@ class User extends Authenticatable implements FilamentUser
             ->count() === count($roles);
     }
 
-    /**
-     * إضافة دور للمستخدم
-     */
     public function assignRole(string|Role $role): void
     {
         if (is_string($role)) {
@@ -308,9 +241,6 @@ class User extends Authenticatable implements FilamentUser
         }
     }
 
-    /**
-     * إزالة دور من المستخدم
-     */
     public function removeRole(string|Role $role): void
     {
         if (is_string($role)) {
@@ -322,12 +252,8 @@ class User extends Authenticatable implements FilamentUser
         }
     }
 
-    /**
-     * التحقق من وجود صلاحية معينة
-     */
     public function hasPermission(string $permission): bool
     {
-        // فحص الصلاحيات المباشرة
         $directPermission = $this->permissions()
             ->where('name', $permission)
             ->where('is_active', true)
@@ -337,7 +263,6 @@ class User extends Authenticatable implements FilamentUser
             return true;
         }
 
-        // فحص الصلاحيات عبر الأدوار
         return $this->roles()
             ->where('is_active', true)
             ->whereHas('permissions', function ($query) use ($permission) {
@@ -347,9 +272,6 @@ class User extends Authenticatable implements FilamentUser
             ->exists();
     }
 
-    /**
-     * التحقق من وجود أي من الصلاحيات المحددة
-     */
     public function hasAnyPermission(array $permissions): bool
     {
         foreach ($permissions as $permission) {
@@ -360,9 +282,6 @@ class User extends Authenticatable implements FilamentUser
         return false;
     }
 
-    /**
-     * إضافة صلاحية مباشرة للمستخدم
-     */
     public function givePermission(string|Permission $permission): void
     {
         if (is_string($permission)) {
@@ -374,9 +293,6 @@ class User extends Authenticatable implements FilamentUser
         }
     }
 
-    /**
-     * إزالة صلاحية مباشرة من المستخدم
-     */
     public function revokePermission(string|Permission $permission): void
     {
         if (is_string($permission)) {
@@ -388,9 +304,6 @@ class User extends Authenticatable implements FilamentUser
         }
     }
 
-    /**
-     * التحقق من وجود صلاحية مباشرة (بدون الأدوار)
-     */
     public function hasDirectPermission(string $permission): bool
     {
         return $this->permissions()
@@ -399,9 +312,6 @@ class User extends Authenticatable implements FilamentUser
             ->exists();
     }
 
-    /**
-     * الحصول على جميع الصلاحيات (مباشرة + عبر الأدوار)
-     */
     public function getAllPermissions()
     {
         $directPermissions = $this->permissions()
@@ -415,25 +325,16 @@ class User extends Authenticatable implements FilamentUser
         return $directPermissions->merge($rolePermissions)->unique('id');
     }
 
-    /**
-     * التحقق من كونه Super Admin
-     */
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('super_admin') || $this->hasPermission('super_admin');
     }
 
-    /**
-     * التحقق من كونه Admin
-     */
     public function isAdmin(): bool
     {
         return $this->hasRole('admin') || $this->hasRole('super_admin');
     }
 
-    /**
-     * الحصول على أعلى دور للمستخدم
-     */
     public function getHighestRole()
     {
         return $this->roles()
@@ -443,12 +344,10 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Determine if the user can access the given Filament panel.
+     * السماح لجميع المستخدمين بالدخول للوحة التحكم
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // السماح لجميع المستخدمين المفعلين بالوصول للوحة التحكم
-        // يمكن تخصيص هذا لاحقاً حسب الحاجة
-        return $this->is_verified && $this->email_verified_at !== null;
+        return true;
     }
 }
