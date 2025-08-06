@@ -19,8 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminLoginController;
 
 // Admin Login Routes
-Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.post');
-Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.post')->middleware('web');
+Route::post('/admin/login', [AdminLoginController::class, 'login'])->withoutMiddleware(['csrf']);
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
