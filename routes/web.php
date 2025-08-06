@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\AdminLoginController;
 
+// Admin Login Routes
+Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.post');
+Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.post')->middleware('web');
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -41,9 +44,6 @@ Route::get('/test-cloudflare-api', [CloudflareTestController::class, 'testCloudf
 // Admin User Creation Routes
 Route::get('/admin/create-user', [AdminUserController::class, 'showCreateForm'])->name('admin.create-user-form');
 Route::post('/admin/create-user', [AdminUserController::class, 'createUser'])->name('admin.create-user');
-// Admin Login Routes بدون أي حماية
-Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm']);
-Route::post('/admin/login', [AdminLoginController::class, 'login'])->withoutMiddleware(['csrf']);
 
 // Test PayPal route
 Route::get('/test-paypal-debug', function () {
