@@ -24,19 +24,9 @@ class SimpleLoginController extends Controller
         
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            
-            // التحقق من أن المستخدم يمكنه الوصول للوحة التحكم
-            $user = Auth::user();
-            
-            if ($user && $user->canAccessPanel(app(\Filament\Panel::class))) {
-                // توجيه مباشر للوحة التحكم
-                return redirect()->intended('/admin');
-            } else {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'ليس لديك صلاحية للوصول للوحة التحكم',
-                ]);
-            }
+
+            // ✅ توجيه مباشر بعد تسجيل الدخول بدون شرط الصلاحيات
+            return redirect()->intended('/admin');
         }
         
         return back()->withErrors([
