@@ -14,7 +14,7 @@ return [
     'lottery' => [2, 100],
     'cookie' => env('SESSION_COOKIE', Str::snake((string) env('APP_NAME', 'laravel')).'_session'),
     'path' => env('SESSION_PATH', '/'),
-    'domain' => '.iam-shop.online',
+    'domain' => env('SESSION_DOMAIN', null),
     'secure' => true,
     'http_only' => true,
     'same_site' => 'none',

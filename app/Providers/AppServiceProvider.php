@@ -27,8 +27,7 @@ class AppServiceProvider extends ServiceProvider
         // فرض HTTPS في وضع الإنتاج
         $this->forceHttpsInProduction();
 
-        // إعداد SSL آمن للجلسات
-        $this->configureSecureSessions();
+        // إعداد SSL آمن للجلسات (تم نقل الإعدادات إلى config/.env فقط)
 
         // إعدادات Alpine.js
         $this->setupAlpineJsFixes();
@@ -79,20 +78,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureSecureSessions(): void
     {
-        if (request()->isSecure()) {
-            config([
-                'session.secure' => true,
-                'session.same_site' => 'lax',
-                'session.http_only' => true,
-            ]);
-        } else {
-            config([
-                'session.secure' => false,
-                'session.same_site' => 'lax',
-                'session.http_only' => true,
-            ]);
-        }
-
+        // إعدادات الجلسة تتم فقط من config/.env
         // التأكد من أن Livewire يستخدم نفس البروتوكول
         if (class_exists(Livewire::class)) {
             Livewire::setUpdateRoute(function ($handle) {

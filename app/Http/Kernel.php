@@ -13,7 +13,6 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
-        \App\Http\Middleware\FixServerAuth::class,
         \App\Http\Middleware\FixLivewireSSL::class,
         \App\Http\Middleware\FixAssetsMiddleware::class,
         // ...

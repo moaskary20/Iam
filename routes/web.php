@@ -197,9 +197,6 @@ Route::get('/deposit', function () {
     return view('deposit');
 })->middleware('auth')->name('deposit');
 
-// Admin Login Routes
-Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login.form');
-Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.post');
 
 
 
