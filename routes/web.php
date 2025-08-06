@@ -18,6 +18,13 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\AdminLoginController;
 
+// Admin Login Routes
+Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login.form');
+Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.post');
+Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login.form')->middleware('web');
+Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.post')->middleware('web');
+
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/api/statistics', [HomeController::class, 'getStatistics'])
     ->name('api.statistics')
