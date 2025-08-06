@@ -15,9 +15,9 @@ return [
     'cookie' => env('SESSION_COOKIE', Str::snake((string) env('APP_NAME', 'laravel')).'_session'),
     'path' => env('SESSION_PATH', '/'),
     'domain' => env('SESSION_DOMAIN', null),
-    'secure' => true,
-    'http_only' => true,
-    'same_site' => 'none',
+    'secure' => false,
+    'http_only' => false,
+    'same_site' => null,
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
 
 // ...باقي التعليقات الافتراضية من Laravel...
